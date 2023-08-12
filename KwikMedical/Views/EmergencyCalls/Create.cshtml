@@ -1,0 +1,136 @@
+﻿@model KwikMedical.Models.EmergencyCall
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Create</h2>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="Patient.NHSNumber" class="control-label">NHS Number</label>
+        <input asp-for="Patient.NHSNumber" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Patient.FirstName" class="control-label">First Name</label>
+        <input asp-for="Patient.FirstName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Patient.LastName" class="control-label">Last Name</label>
+        <input asp-for="Patient.LastName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" id="checkPatient">Check Patient</button>
+    </div>
+</form>
+
+<div class="modal" tabindex="-1" role="dialog" id="patientInfoModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Patient Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="patientDetails">
+                    <!-- Patient info will be injected here by jQuery -->
+                </div>
+                <div id="emergencyDetails">
+                    <label for="EmergencyDetails">Emergency Details</label>
+                    <input type="text" id="EmergencyDetails" class="form-control" />
+                    <label for="EmergencyCity">Emergency City</label>
+                    <input type="text" id="EmergencyCity" class="form-control" />
+                    <label for="EmergencyStatus">Emergency Status</label>
+                    <input type="text" id="EmergencyStatus" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="createEmergencyCall">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    $(document).ready(function () {
+        var patientId; // Declare patientId variable here
+
+        $("#checkPatient").click(function () {
+            var firstName = $("#Patient_FirstName").val();
+            var lastName = $("#Patient_LastName").val();
+            var nhsNumber = $("#Patient_NHSNumber").val();
+
+            $.post("/EmergencyCalls/CheckPatient", { firstName, lastName, nhsNumber }, function (data) {
+                if (data != null) {
+                    patientId = data.id; // Store the patient ID when patient is found
+
+                    $("#patientDetails").html(
+                        'First Name: ' + data.firstName + '<br>' +
+                        'Last Name: ' + data.lastName + '<br>' +
+                        'NHS Number: ' + data.nhsNumber + '<br>' +
+                        'Address: ' + data.address + '<br>' +
+                        'City: ' + data.city + '<br>' +
+                        'Postcode: ' + data.postcode + '<br>' +
+                        'Laboratory Reports: ' + data.medicalRecord.laboratoryReports + '<br>' +
+                        'Telephone Calls: ' + data.medicalRecord.telephoneCalls + '<br>' +
+                        'X-Rays: ' + data.medicalRecord.xrays + '<br>' +
+                        'Letters: ' + data.medicalRecord.letters + '<br>' +
+                        'Prescription Charts: ' + data.medicalRecord.prescriptionCharts + '<br>' +
+                        'Clinical Notes: ' + data.medicalRecord.clinicalNotes
+                    );
+
+                    $("#patientInfoModal").modal("show");
+                }
+                else {
+                    alert("Patient not found.");
+                }
+            }).fail(function () {
+                alert("An error occurred while checking the patient.");
+            });
+        });
+
+            $("#createEmergencyCall").click(function () {
+                var emergencyDetails = $("#EmergencyDetails").val();
+                var emergencyCity = $("#EmergencyCity").val();
+                var emergencyStatus = $("#EmergencyStatus").val();
+
+                // make sure all fields are filled
+                if (emergencyDetails && emergencyCity && emergencyStatus && patientId) {
+                    $.ajax({
+                        url: '/EmergencyCalls/CreateEmergencyCall',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            EmergencyDetails: emergencyDetails,
+                            EmergencyCity: emergencyCity,
+                            EmergencyStatus: emergencyStatus,
+                            PatientId: patientId,
+                        }),
+                        success: function (data) {
+                            if (data.success) {
+                                alert("Emergency call created successfully");
+                            }
+                            else {
+                                alert("Failed to create emergency call");
+                            }
+                        },
+                        error: function (error) {
+                            alert("An error occurred while creating the emergency call.");
+                        }
+                    });
+                }
+                else {
+                    alert("Please fill in all emergency details and check the patient.");
+                }
+            });
+
+
+
+
+    });
+</script>
+}

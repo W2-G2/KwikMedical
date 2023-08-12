@@ -1,0 +1,14 @@
+﻿@model KwikMedical.Models.Hospital
+
+<h2>@Model.Name</h2>
+<p>@Model.City</p>
+
+<h3>Ambulances</h3>
+<ul>
+    @foreach (var ambulance in Model.Ambulances)
+    {
+        <li>@ambulance.Code - @Html.ActionLink("View Details", "Details", "Ambulances", new { id = ambulance.Id }, null)</li>
+    }
+</ul>
+
+@Html.ActionLink("Create New Ambulance", "Create", "Ambulances", new { hospitalId = Model.Id }, new { @class = "btn btn-primary" })

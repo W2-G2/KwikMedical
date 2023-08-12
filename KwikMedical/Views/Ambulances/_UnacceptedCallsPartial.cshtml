@@ -1,0 +1,32 @@
+﻿@model IEnumerable<KwikMedical.Models.EmergencyCall>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No unaccepted emergency calls.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Call ID</th>
+                <th>Patient</th>
+                <th>Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var call in Model)
+            {
+                <tr>
+                    <td>@call.Id</td>
+                    <td>@call.PatientId</td> <!-- assuming there's a PatientId field, adjust as needed -->
+                    <td>@call.EmergencyDetails</td>
+                    <td>
+                        <button class="btn btn-primary accept-call-button" data-id="@call.Id">Accept</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
