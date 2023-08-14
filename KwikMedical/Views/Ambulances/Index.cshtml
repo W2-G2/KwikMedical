@@ -27,7 +27,7 @@
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Edit</a>
                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
-                        <button type="button" class="btn btn-primary btn-sm acceptCallButton" data-ambulance="@item.Id" data-bs-toggle="modal" data-bs-target="#dispatchModal">
+                        <button type="button" class="btn btn-primary btn-sm acceptCallButton" data-ambulance="@item.Id" onclick="assignCallToAmbulance(@(item.CurrentEmergencyCallId ?? -1), @item.Id)">
                             Accept Call
                         </button>
                     </td>
@@ -64,51 +64,84 @@
 
     <!-- JavaScript Logic -->
     <script>
-        $(document).ready(function () {
-            // Script to handle the modal display for assigning calls from the partial view
-            $('.assign-call-btn').on('click', function () {
-                var callId = $(this).data('call-id');
-                var ambulanceId = $(this).data('ambulance-id'); // Assuming you've added data-ambulance-id attribute to the button
-
-                // Assign the call to the ambulance in the backend
-                $.ajax({
-                    url: '/Ambulances/AssignCall', // Assuming you have an AssignCall action in Ambulances controller
-                    type: 'POST',
-                    data: {
-                        callId: callId,
-                        ambulanceId: ambulanceId
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            // If the call was successfully assigned, show the modal
-                            $('#travelModal').modal('show');
-                            $('#travelToPatientTime').text('Traveling to patient... Estimated time: 10 seconds');
-                            setTimeout(function () {
-                                $('#sceneDetailsSection').show();
-                                $('#travelToPatientTime').text('Arrived at patient location.');
-                                $('#travelToHospitalTime').text('Traveling to hospital... Estimated time: 10 seconds');
-                            }, 10000); // After 10 seconds (travel time to patient)
-                        } else {
-                            alert('Error assigning call to ambulance.');
-                        }
-                    },
-                    error: function () {
-                        alert('Error assigning call to ambulance.');
+        function autoAssignCall(emergencyCity) {
+            $.ajax({
+                url: '/Ambulances/AutoAssignCall',
+                type: 'POST',
+                data: { emergencyCity: emergencyCity },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
                     }
-                });
+                }
             });
+        }
 
-            // Handle the submission of scene details
-            $('#submitSceneDetails').on('click', function () {
-                // Logic to submit scene details and update the database goes here
-                // After submitting, start the timer for traveling to the hospital
-                $('#sceneDetailsSection').hide();
-                $('#travelToHospitalTime').show();
-                setTimeout(function () {
-                    $('#travelModal').modal('hide');
-                    // Logic to update the ambulance status and remove the emergency call goes here
-                }, 10000); // After 10 seconds (travel time to hospital)
+        function assignCallToAmbulance(emergencyCallId, ambulanceId) {
+            $.ajax({
+                url: '/Ambulances/AssignCall',
+                type: 'POST',
+                data: { emergencyCallId: emergencyCallId, ambulanceId: ambulanceId },
+                success: function (response) {
+                    if (response.success) {
+                        startTravelSimulation();
+                    } else {
+                        alert(response.message);
+                    }
+                }
             });
-        });
+        }
 
+        function startTravelSimulation() {
+            $('#travelModal').modal('show');
+            setTimeout(function () {
+                $('#travelModal').modal('hide');
+                $('#medicalRecordModal').modal('show');
+            }, 10000);
+        }
+
+        function updateMedicalRecord(emergencyCallId, updatedPatient, updatedRecord) {
+            $.ajax({
+                url: '/Ambulances/UpdateMedicalRecord',
+                type: 'POST',
+                data: {
+                    emergencyCallId: emergencyCallId,
+                    updatedPatient: updatedPatient,
+                    updatedRecord: updatedRecord
+                },
+                success: function (response) {
+                    if (response.success) {
+                        startHospitalTravelSimulation();
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+
+        function startHospitalTravelSimulation() {
+            setTimeout(function () {
+                concludeEmergencyCall(emergencyCallId);
+            }, 10000);
+        }
+
+        function concludeEmergencyCall(emergencyCallId) {
+            $.ajax({
+                url: '/Ambulances/ConcludeEmergencyCall',
+                type: 'POST',
+                data: { emergencyCallId: emergencyCallId },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
     </script>
+</div>

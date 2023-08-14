@@ -261,4 +261,109 @@ public class AmbulancesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpPost]
+    public IActionResult AutoAssignCall(string emergencyCity)
+    {
+        // Retrieve the oldest unassigned emergency call for the given city
+        var emergencyCall = _context.EmergencyCalls
+                                    .Where(e => e.EmergencyCity == emergencyCity && e.AmbulanceId == null)
+                                    .OrderBy(e => e.Id)
+                                    .FirstOrDefault();
+
+        if (emergencyCall == null)
+        {
+            return Json(new { success = false, message = "No unassigned calls for the given city." });
+        }
+
+        // Find the next available ambulance in the same city
+        var availableAmbulance = _context.Ambulances
+                                        .Where(a => a.CurrentCity == emergencyCity && a.IsAvailable == true)
+                                        .FirstOrDefault();
+
+        if (availableAmbulance == null)
+        {
+            return Json(new { success = false, message = "No available ambulances in the given city." });
+        }
+
+        // Assign the emergency call to the ambulance
+        emergencyCall.AmbulanceId = availableAmbulance.Id;
+        availableAmbulance.IsAvailable = false;
+        availableAmbulance.CurrentEmergencyCallId = emergencyCall.Id;
+
+        _context.SaveChanges();
+
+        return Json(new { success = true, message = "Emergency call assigned successfully." });
+    }
+
+    [HttpPost]
+    public IActionResult AssignCall(int emergencyCallId, int ambulanceId)
+    {
+        var emergencyCall = _context.EmergencyCalls.Find(emergencyCallId);
+        var ambulance = _context.Ambulances.Find(ambulanceId);
+
+        if (emergencyCall == null || ambulance == null)
+        {
+            return Json(new { success = false, message = "Invalid emergency call or ambulance ID." });
+        }
+
+        // Assign the emergency call to the ambulance
+        emergencyCall.AmbulanceId = ambulance.Id;
+        ambulance.IsAvailable = false;
+        ambulance.CurrentEmergencyCallId = emergencyCall.Id;
+
+        _context.SaveChanges();
+
+        return Json(new { success = true, message = "Emergency call assigned successfully." });
+    }
+
+    [HttpPost]
+    public IActionResult UpdateMedicalRecord(int emergencyCallId, Patient updatedPatient, MedicalRecord updatedRecord)
+    {
+        var emergencyCall = _context.EmergencyCalls
+                            .Include(e => e.Patient)
+                            .ThenInclude(p => p.MedicalRecord)
+                            .FirstOrDefault(e => e.Id == emergencyCallId);
+
+        if (emergencyCall == null)
+        {
+            return Json(new { success = false, message = "Invalid emergency call ID." });
+        }
+
+        // Update patient and medical record details
+        emergencyCall.Patient.FirstName = updatedPatient.FirstName;
+        emergencyCall.Patient.LastName = updatedPatient.LastName;
+        emergencyCall.Patient.NHSNumber = updatedPatient.NHSNumber;
+        emergencyCall.Patient.Address = updatedPatient.Address;
+        emergencyCall.Patient.City = updatedPatient.City;
+        emergencyCall.Patient.Postcode = updatedPatient.Postcode;
+
+        emergencyCall.Patient.MedicalRecord.LaboratoryReports = updatedRecord.LaboratoryReports;
+        emergencyCall.Patient.MedicalRecord.TelephoneCalls = updatedRecord.TelephoneCalls;
+        emergencyCall.Patient.MedicalRecord.Xrays = updatedRecord.Xrays;
+        emergencyCall.Patient.MedicalRecord.Letters = updatedRecord.Letters;
+        emergencyCall.Patient.MedicalRecord.PrescriptionCharts = updatedRecord.PrescriptionCharts;
+        emergencyCall.Patient.MedicalRecord.ClinicalNotes = updatedRecord.ClinicalNotes;
+
+        _context.SaveChanges();
+
+        return Json(new { success = true, message = "Medical record updated successfully." });
+    }
+
+    [HttpPost]
+    public IActionResult ConcludeEmergencyCall(int emergencyCallId)
+    {
+        var emergencyCall = _context.EmergencyCalls.Find(emergencyCallId);
+
+        if (emergencyCall == null)
+        {
+            return Json(new { success = false, message = "Invalid emergency call ID." });
+        }
+
+        _context.EmergencyCalls.Remove(emergencyCall);
+        _context.SaveChanges();
+
+        return Json(new { success = true, message = "Emergency call concluded successfully." });
+    }
+
 }
