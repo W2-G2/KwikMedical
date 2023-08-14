@@ -65,6 +65,14 @@ public class AmbulancesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Code,IsAvailable,HospitalId,CurrentCity")] Ambulance ambulance)
     {
+        // Check if the provided HospitalId exists in the Hospitals table
+        if (!_context.Hospitals.Any(h => h.Id == ambulance.HospitalId))
+        {
+            ModelState.AddModelError("HospitalId", "The selected hospital does not exist.");
+            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
+            return View(ambulance);
+        }
+
         var selectedHospital = await _context.Hospitals.FindAsync(ambulance.HospitalId);
         if (selectedHospital != null)
         {
@@ -73,12 +81,19 @@ public class AmbulancesController : Controller
 
         if (ModelState.IsValid)
         {
-            _context.Add(ambulance);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _context.Add(ambulance);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while saving the ambulance. " + ex.Message);
+            }
         }
 
-        ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
+        ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
         return View(ambulance);
     }
 
