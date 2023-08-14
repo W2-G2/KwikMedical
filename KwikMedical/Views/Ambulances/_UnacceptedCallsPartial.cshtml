@@ -1,13 +1,10 @@
 ﻿@model IEnumerable<KwikMedical.Models.EmergencyCall>
 
-@if (Model == null || !Model.Any())
-{
-    <p>No unaccepted emergency calls.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
+<div class="container mt-5">
+    <h3 class="mb-4">Active Emergency Calls</h3>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-danger">
             <tr>
                 <th>Call ID</th>
                 <th>Patient</th>
@@ -20,13 +17,13 @@ else
             {
                 <tr>
                     <td>@call.Id</td>
-                    <td>@call.PatientId</td> <!-- assuming there's a PatientId field, adjust as needed -->
+                    <td>@call.PatientId</td>
                     <td>@call.EmergencyDetails</td>
                     <td>
-                        <button class="btn btn-primary accept-call-button" data-id="@call.Id">Accept</button>
+                        <button class="btn btn-primary btn-sm assign-call-btn" data-call-id="@call.Id">Assign to Ambulance</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-}
+</div>

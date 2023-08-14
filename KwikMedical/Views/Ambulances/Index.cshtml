@@ -1,196 +1,114 @@
 ﻿@model IEnumerable<KwikMedical.Models.Ambulance>
 
-<h2>Index</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Ambulances</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Code)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CurrentEmergencyCall)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-success">Create New Ambulance</a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Code)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsAvailable)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CurrentEmergencyCall)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
-                    <button type="button" class="btn btn-primary acceptCallButton" data-ambulance="@item.Id" data-bs-toggle="modal" data-bs-target="#dispatchModal">
-                        Accept Call
-                    </button>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.Code)</th>
+                <th>@Html.DisplayNameFor(model => model.IsAvailable)</th>
+                <th>@Html.DisplayNameFor(model => model.CurrentEmergencyCall)</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Code)</td>
+                    <td>@Html.DisplayFor(modelItem => item.IsAvailable)</td>
+                    <td>@Html.DisplayFor(modelItem => item.CurrentEmergencyCall)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                        <button type="button" class="btn btn-primary btn-sm acceptCallButton" data-ambulance="@item.Id" data-bs-toggle="modal" data-bs-target="#dispatchModal">
+                            Accept Call
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-<!-- Bootstrap Modal -->
-<div class="modal" tabindex="-1" id="dispatchModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Dispatch Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="dispatchTimer">Dispatching in 10 seconds...</p>
-                <form id="patientUpdateForm" style="display: none;" method="POST" action="@Url.Action("UpdatePatientRecords", "PatientRecords")">
-                    <input type="hidden" name="ambulanceId">
-                    <div class="form-group">
-                        <label for="firstName">First Name:</label>
-                        <input type="text" id="firstName" name="firstName" class="form-control" placeholder="First Name">
+    <!-- Unaccepted Calls Partial View -->
+    @await Html.PartialAsync("_UnacceptedCallsPartial", (IEnumerable<KwikMedical.Models.EmergencyCall>)ViewData["UnacceptedCalls"])
+
+    <!-- Travel Modal -->
+    <div class="modal fade" id="travelModal" tabindex="-1" aria-labelledby="travelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="travelModalLabel">Travel Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="travelToPatientTime">Traveling to patient...</p>
+                    <div id="sceneDetailsSection" style="display:none;">
+                        <!-- Scene details form goes here. This can include patient details, medical conditions, etc. -->
                     </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name:</label>
-                        <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Last Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="nhsNumber">NHS Number:</label>
-                        <input type="text" id="nhsNumber" name="nhsNumber" class="form-control" placeholder="NHS Number">
-                    </div>
-                    <div class="form-group">
-                        <label for="address">Address:</label>
-                        <input type="text" id="address" name="address" class="form-control" placeholder="Address">
-                    </div>
-                    <div class="form-group">
-                        <label for="city">City:</label>
-                        <input type="text" id="city" name="city" class="form-control" placeholder="City">
-                    </div>
-                    <div class="form-group">
-                        <label for="postcode">Postcode:</label>
-                        <input type="text" id="postcode" name="postcode" class="form-control" placeholder="Postcode">
-                    </div>
-                    <div class="form-group">
-                        <label for="laboratoryReports">Laboratory Reports:</label>
-                        <textarea id="laboratoryReports" name="laboratoryReports" class="form-control" placeholder="Laboratory Reports"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="telephoneCalls">Telephone Calls:</label>
-                        <textarea id="telephoneCalls" name="telephoneCalls" class="form-control" placeholder="Telephone Calls"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="xrays">X-Rays:</label>
-                        <textarea id="xrays" name="xrays" class="form-control" placeholder="X-Rays"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="letters">Letters:</label>
-                        <textarea id="letters" name="letters" class="form-control" placeholder="Letters"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="prescriptionCharts">Prescription Charts:</label>
-                        <textarea id="prescriptionCharts" name="prescriptionCharts" class="form-control" placeholder="Prescription Charts"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="clinicalNotes">Clinical Notes:</label>
-                        <textarea id="clinicalNotes" name="clinicalNotes" class="form-control" placeholder="Clinical Notes"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </form>
-                <!-- Final Form -->
-                <form id="finalForm" style="display: none;" method="POST" action="@Url.Action("FinalizePatient", "Patients")">
-                    <input type="hidden" name="ambulanceId">
-                    <div class="form-group">
-                        <label for="patientCondition">Patient Condition:</label>
-                        <input type="text" id="patientCondition" name="patientCondition" class="form-control" placeholder="Patient Condition">
-                    </div>
-                    <!-- Add other finalization fields here... -->
-                    <button type="submit" class="btn btn-primary">Finalize</button>
-                </form>
-                <input type="hidden" id="patientUpdateFormAmbulanceId" name="ambulanceId">
-                <input type="hidden" id="finalFormAmbulanceId" name="ambulanceId">
+                    <p id="travelToHospitalTime" style="display:none;">Traveling to hospital...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitSceneDetails" style="display:none;">Submit Details</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.querySelectorAll('.acceptCallButton').forEach(button => {
-        button.addEventListener('click', () => {
-            const ambulanceId = button.dataset.ambulance;
-            document.querySelector('#patientUpdateFormAmbulanceId').value = ambulanceId;
-            document.querySelector('#finalFormAmbulanceId').value = ambulanceId;
+    <!-- JavaScript Logic -->
+    <script>
+        $(document).ready(function () {
+            // Script to handle the modal display for assigning calls from the partial view
+            $('.assign-call-btn').on('click', function () {
+                var callId = $(this).data('call-id');
+                var ambulanceId = $(this).data('ambulance-id'); // Assuming you've added data-ambulance-id attribute to the button
 
-            // Ajax request to get patient data
-            $.ajax({
-                url: `@Url.Action("UpdateMedicalRecords", "Ambulances")/${ambulanceId}`,
-                type: 'GET',
-                success: function (medicalRecord) {
-                    // Populate the form with the fetched data
-                    $('#firstName').val(medicalRecord.firstName);
-                    $('#lastName').val(medicalRecord.lastName);
-                    $('#nhsNumber').val(medicalRecord.nhsNumber);
-                    $('#address').val(medicalRecord.address);
-                    $('#city').val(medicalRecord.city);
-                    $('#postcode').val(medicalRecord.postcode);
-                    $('#laboratoryReports').val(medicalRecord.laboratoryReports);
-                    $('#telephoneCalls').val(medicalRecord.telephoneCalls);
-                    $('#xrays').val(medicalRecord.xrays);
-                    $('#letters').val(medicalRecord.letters);
-                    $('#prescriptionCharts').val(medicalRecord.prescriptionCharts);
-                    $('#clinicalNotes').val(medicalRecord.clinicalNotes);
-                },
-                error: function (error) {
-                    console.error(error);
-                }
+                // Assign the call to the ambulance in the backend
+                $.ajax({
+                    url: '/Ambulances/AssignCall', // Assuming you have an AssignCall action in Ambulances controller
+                    type: 'POST',
+                    data: {
+                        callId: callId,
+                        ambulanceId: ambulanceId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // If the call was successfully assigned, show the modal
+                            $('#travelModal').modal('show');
+                            $('#travelToPatientTime').text('Traveling to patient... Estimated time: 10 seconds');
+                            setTimeout(function () {
+                                $('#sceneDetailsSection').show();
+                                $('#travelToPatientTime').text('Arrived at patient location.');
+                                $('#travelToHospitalTime').text('Traveling to hospital... Estimated time: 10 seconds');
+                            }, 10000); // After 10 seconds (travel time to patient)
+                        } else {
+                            alert('Error assigning call to ambulance.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error assigning call to ambulance.');
+                    }
+                });
+            });
+
+            // Handle the submission of scene details
+            $('#submitSceneDetails').on('click', function () {
+                // Logic to submit scene details and update the database goes here
+                // After submitting, start the timer for traveling to the hospital
+                $('#sceneDetailsSection').hide();
+                $('#travelToHospitalTime').show();
+                setTimeout(function () {
+                    $('#travelModal').modal('hide');
+                    // Logic to update the ambulance status and remove the emergency call goes here
+                }, 10000); // After 10 seconds (travel time to hospital)
             });
         });
-    });
 
-    // Timer
-    let timeRemaining = 10;
-    const timer = setInterval(() => {
-        timeRemaining--;
-        document.getElementById('dispatchTimer').textContent = `Dispatching in ${timeRemaining} seconds...`;
-        if (timeRemaining <= 0) {
-            clearInterval(timer);
-            // code to show the patient update form goes here
-            document.getElementById('patientUpdateForm').style.display = 'block';
-        }
-    }, 1000);
-
-    // Second Timer after form submission
-    document.getElementById('patientUpdateForm').addEventListener('submit', () => {
-        document.getElementById('moveToHospitalTimer').style.display = 'block';
-        let timeRemaining2 = 10;
-        const timer2 = setInterval(() => {
-            timeRemaining2--;
-            document.getElementById('moveToHospitalTimer').textContent = `Moving to hospital in ${timeRemaining2} seconds...`;
-            if (timeRemaining2 <= 0) {
-                clearInterval(timer2);
-                // code to show the final form goes here
-                document.getElementById('finalForm').style.display = 'block';
-            }
-        }, 1000);
-    });
-
-    // Reset everything when the modal is closed
-    $('#dispatchModal').on('hidden.bs.modal', () => {
-        timeRemaining = 10;
-        document.getElementById('dispatchTimer').textContent = `Dispatching in ${timeRemaining} seconds...`;
-        document.getElementById('patientUpdateForm').style.display = 'none';
-        document.getElementById('moveToHospitalTimer').style.display = 'none';
-        document.getElementById('finalForm').style.display = 'none';
-    });
-</script>
+    </script>
