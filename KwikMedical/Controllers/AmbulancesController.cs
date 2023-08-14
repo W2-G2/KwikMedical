@@ -56,7 +56,7 @@ public class AmbulancesController : Controller
     // GET: Ambulances/Create
     public IActionResult Create()
     {
-        ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Name");
+        ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
         return View();
     }
 
