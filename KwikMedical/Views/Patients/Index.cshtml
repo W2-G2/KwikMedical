@@ -6,10 +6,17 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="row mt-5">
-    <div class="col-md-10 mx-auto">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-success">Add New Patient</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">List of Patients</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
@@ -40,8 +47,4 @@
             </tbody>
         </table>
     </div>
-</div>
-
-<div class="mt-4 text-center">
-    <a asp-action="Create" class="btn btn-success">Add New Patient</a>
 </div>

@@ -1,8 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "KwikMedical Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mt-5">
+    <h1 class="display-4">Welcome to KwikMedical</h1>
+    <p class="lead">Your centralized hub for emergency medical services.</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Ambulances
+            </div>
+            <div class="card-body">
+                <p>Manage and view all ambulances.</p>
+                <a asp-controller="Ambulances" asp-action="Index" class="btn btn-primary btn-block">Go to Ambulances</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Patients
+            </div>
+            <div class="card-body">
+                <p>Manage and view all patients.</p>
+                <a asp-controller="Patients" asp-action="Index" class="btn btn-primary btn-block">Go to Patients</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Hospitals
+            </div>
+            <div class="card-body">
+                <p>Manage and view all hospitals.</p>
+                <a asp-controller="Hospitals" asp-action="Index" class="btn btn-primary btn-block">Go to Hospitals</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Emergency Calls
+            </div>
+            <div class="card-body">
+                <p>Manage and view all emergency calls.</p>
+                <a asp-controller="EmergencyCalls" asp-action="Index" class="btn btn-primary btn-block">Go to Emergency Calls</a>
+            </div>
+        </div>
+    </div>
 </div>

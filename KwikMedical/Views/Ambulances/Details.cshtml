@@ -8,12 +8,12 @@
 
 <div class="row mt-5">
     <div class="col-md-6 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h4>Details for Ambulance @Model.Code</h4>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Details for Ambulance @Model.Code</h4>
             </div>
             <div class="card-body">
-                <dl class="row">
+                <dl class="row mb-4">
                     <dt class="col-sm-4">Ambulance Code:</dt>
                     <dd class="col-sm-8">@Model.Code</dd>
 
@@ -26,6 +26,6 @@
 </div>
 
 <div class="mt-4 text-center">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning mr-2">Edit</a>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
