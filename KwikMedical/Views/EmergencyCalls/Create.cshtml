@@ -1,28 +1,39 @@
 ﻿@model KwikMedical.Models.EmergencyCall
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Emergency Call";
 }
 
-<h2>Create</h2>
+<h1>@ViewData["Title"]</h1>
 
-<form asp-action="Create">
-    <div class="form-group">
-        <label asp-for="Patient.NHSNumber" class="control-label">NHS Number</label>
-        <input asp-for="Patient.NHSNumber" class="form-control" />
+<div class="row mt-5">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create New Emergency Call</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div class="form-group mb-4">
+                        <label asp-for="Patient.NHSNumber" class="control-label">NHS Number</label>
+                        <input asp-for="Patient.NHSNumber" class="form-control" />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label asp-for="Patient.FirstName" class="control-label">First Name</label>
+                        <input asp-for="Patient.FirstName" class="form-control" />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label asp-for="Patient.LastName" class="control-label">Last Name</label>
+                        <input asp-for="Patient.LastName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="checkPatient">Check Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Patient.FirstName" class="control-label">First Name</label>
-        <input asp-for="Patient.FirstName" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Patient.LastName" class="control-label">Last Name</label>
-        <input asp-for="Patient.LastName" class="form-control" />
-    </div>
-    <div class="form-group">
-        <button type="button" class="btn btn-primary" id="checkPatient">Check Patient</button>
-    </div>
-</form>
+</div>
 
 <div class="modal" tabindex="-1" role="dialog" id="patientInfoModal">
     <div class="modal-dialog" role="document">

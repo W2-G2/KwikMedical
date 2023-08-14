@@ -1,48 +1,40 @@
 ﻿@model KwikMedical.Models.EmergencyCall
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Emergency Call Details";
 }
 
-<h1>Details</h1>
+<h1>@ViewData["Title"]</h1>
 
-<div>
-    <h4>EmergencyCall</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EmergencyDetails)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EmergencyDetails)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EmergencyCity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EmergencyCity)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EmergencyStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EmergencyStatus)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NearestHospital)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NearestHospital)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Patient)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Patient.Id)
-        </dd>
-    </dl>
+<div class="row mt-5">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Details of Emergency Call</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-4">
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.EmergencyDetails)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.EmergencyDetails)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.EmergencyCity)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.EmergencyCity)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.EmergencyStatus)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.EmergencyStatus)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.NearestHospital)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.NearestHospital)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Patient)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Patient.Id)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-4 text-center">
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning mr-2">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
