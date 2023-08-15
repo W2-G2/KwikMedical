@@ -1,0 +1,17 @@
+﻿@model KwikMedical.Models.EmergencyCall
+
+<h2>Update Patient Record</h2>
+
+<form asp-action="UpdatePatientRecord" method="post">
+    <div>
+        <label for="actionTaken">Action Taken:</label>
+        <textarea id="actionTaken" name="actionTaken" required></textarea>
+    </div>
+    <div>
+        <label for="timeSpent">Time Spent:</label>
+        <input type="text" id="timeSpent" name="timeSpent" required />
+    </div>
+    <div>
+        <input type="submit" value="Update Record" />
+    </div>
+</form>

@@ -1,141 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using KwikMedical.Data;
+﻿using KwikMedical.Data;
 using KwikMedical.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
-namespace KwikMedical.Controllers;
-
-public class HospitalsController : Controller
+namespace KwikMedical.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public HospitalsController(ApplicationDbContext context)
+    public class HospitalController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: Hospitals
-    public async Task<IActionResult> Index()
-    {
-        return View(await _context.Hospitals.ToListAsync());
-    }
-
-    // GET: Hospitals/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public HospitalController(ApplicationDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
-        if (hospital == null)
+        public IActionResult UpdatePatientRecord(int emergencyCallId, string actionTaken, string timeSpent)
         {
-            return NotFound();
-        }
-
-        return View(hospital);
-    }
-
-    // GET: Hospitals/Create
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: Hospitals/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Name,City")] Hospital hospital)
-    {
-        if (ModelState.IsValid)
-        {
-            _context.Add(hospital);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(hospital);
-    }
-
-    // GET: Hospitals/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var hospital = await _context.Hospitals.FindAsync(id);
-        if (hospital == null)
-        {
-            return NotFound();
-        }
-        return View(hospital);
-    }
-
-    // POST: Hospitals/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Hospital hospital)
-    {
-        if (id != hospital.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
+            var emergencyCall = _context.EmergencyCalls.FirstOrDefault(e => e.Id == emergencyCallId);
+            if (emergencyCall != null)
             {
-                _context.Update(hospital);
-                await _context.SaveChangesAsync();
+                // Logic to update the patient's record with the call-out details
+                // This can include details like who, what, when, where, any action taken, and length of time spent on the call
+
+                emergencyCall.EmergencyStatus = "Completed";
+                _context.EmergencyCalls.Update(emergencyCall);
+                _context.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!HospitalExists(hospital.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
+
+            return RedirectToAction("Index");
         }
-        return View(hospital);
-    }
-
-    // GET: Hospitals/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
-        if (hospital == null)
-        {
-            return NotFound();
-        }
-
-        return View(hospital);
-    }
-
-    // POST: Hospitals/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var hospital = await _context.Hospitals.FindAsync(id);
-        _context.Hospitals.Remove(hospital);
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool HospitalExists(int id)
-    {
-        return _context.Hospitals.Any(e => e.Id == id);
     }
 }

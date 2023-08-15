@@ -1,13 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace KwikMedical.Models;
-
-public class Hospital
+namespace KwikMedical.Models
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // This attribute specifies that the Id field is auto-generated.
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string City { get; set; }
-    public List<Ambulance> Ambulances { get; set; }
+    public class Hospital
+    {
+        [Key]
+        public int Id { get; set; }
 
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string City { get; set; }
+
+        public virtual ICollection<Ambulance> Ambulances { get; set; }
+    }
 }

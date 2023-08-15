@@ -1,0 +1,16 @@
+﻿@model (List<KwikMedical.Models.EmergencyCall>, List<KwikMedical.Models.Ambulance>)
+
+<h2>Dashboard</h2>
+
+<h3>Ongoing Emergencies</h3>
+@foreach (var emergency in Model.Item1)
+{
+    <p>@emergency.EmergencyDetails in @emergency.EmergencyCity</p>
+}
+
+<h3>Available Ambulances</h3>
+@foreach (var ambulance in Model.Item2)
+{
+    <p>Ambulance Code: @ambulance.Code in @ambulance.CurrentCity</p>
+    <p>Current Location: @ambulance.Location</p>
+}

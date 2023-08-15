@@ -20,4 +20,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.15" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="Views\Hospitals\" />
+    <Folder Include="Views\MedicalRecords\" />
+  </ItemGroup>
+
 </Project>
