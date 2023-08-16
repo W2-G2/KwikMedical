@@ -1,0 +1,12 @@
+﻿@model KwikMedical.Models.AmbulanceDashboardViewModel
+
+<h2>Ambulance Dashboard</h2>
+
+<h4>Current Emergency Call</h4>
+<p>Patient: @Model.Ambulance.CurrentEmergencyCall.Patient.FirstName @Model.Ambulance.CurrentEmergencyCall.Patient.LastName</p>
+<p>Emergency Details: @Model.Ambulance.CurrentEmergencyCall.EmergencyDetails</p>
+
+<h4>Patient Medical Records</h4>
+<p>Laboratory Reports: @Model.MedicalRecord.LaboratoryReports</p>
+<p>Telephone Calls: @Model.MedicalRecord.TelephoneCalls</p>
+<!-- ... other medical record details ... -->

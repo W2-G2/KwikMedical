@@ -1,0 +1,26 @@
+﻿<h2>Ambulances</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Status</th>
+            <th>Current City</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ambulance in Model)
+        {
+            <tr>
+                <td>@ambulance.Code</td>
+                <td>@(ambulance.IsAvailable ? "Available" : "On Call")</td>
+                <td>@ambulance.CurrentCity</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@ambulance.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@ambulance.Id">Edit</a> |
+                    <a asp-action="Dashboard" asp-route-id="@ambulance.Id">Dashboard</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

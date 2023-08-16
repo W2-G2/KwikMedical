@@ -29,5 +29,8 @@ namespace KwikMedical.Models
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public string OperatorName { get; set; }  // Name of the operator who received the call
         public string MedicalCondition { get; set; }  // Medical condition described during the call
+        public DateTime EstimatedArrivalTime { get; set; }  // ETA at the hospital
+
+        public bool IsCompleted { get; set; }
     }
 }

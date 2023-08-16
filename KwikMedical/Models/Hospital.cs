@@ -15,5 +15,7 @@ namespace KwikMedical.Models
         public string City { get; set; }
 
         public virtual ICollection<Ambulance> Ambulances { get; set; }
+        public string PreparationStatus { get; set; }  // Status of preparations for incoming patients
+
     }
 }

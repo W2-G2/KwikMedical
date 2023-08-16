@@ -1,58 +1,127 @@
 ﻿using KwikMedical.Data;
 using KwikMedical.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace KwikMedical.Controllers
 {
-    public class AmbulanceController : Controller
+    public class AmbulancesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public AmbulanceController(ApplicationDbContext context)
+        public AmbulancesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult AmbulanceStatus(int id)
+        // GET: Ambulances
+        public async Task<IActionResult> Index()
         {
-            var ambulance = _context.Ambulances.FirstOrDefault(a => a.Id == id);
+            return View(await _context.Ambulances.Include(a => a.Hospital).ToListAsync());
+        }
+
+        // GET: Ambulances/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var ambulance = await _context.Ambulances
+                .Include(a => a.Hospital)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (ambulance == null)
+            {
+                return NotFound();
+            }
+
             return View(ambulance);
         }
 
-        [HttpPost]
-        public IActionResult UpdateStatus(Ambulance ambulance)
+        // GET: Ambulances/UpdateStatus/5
+        public async Task<IActionResult> UpdateStatus(int? id)
         {
-            var existingAmbulance = _context.Ambulances.FirstOrDefault(a => a.Id == ambulance.Id);
-            if (existingAmbulance != null)
+            if (id == null)
             {
-                existingAmbulance.IsAvailable = ambulance.IsAvailable;
-                existingAmbulance.CurrentCity = ambulance.CurrentCity;
-                _context.Ambulances.Update(existingAmbulance);
-                _context.SaveChanges();
-            }
-            return RedirectToAction("AmbulanceStatus", new { id = ambulance.Id });
-        }
-
-        public IActionResult SendMedicalRecords(int ambulanceId)
-        {
-            var ambulance = _context.Ambulances.FirstOrDefault(a => a.Id == ambulanceId);
-            if (ambulance != null && ambulance.CurrentEmergencyCallId.HasValue)
-            {
-                var emergencyCall = _context.EmergencyCalls.FirstOrDefault(e => e.Id == ambulance.CurrentEmergencyCallId.Value);
-                if (emergencyCall != null)
-                {
-                    var patientMedicalRecord = _context.MedicalRecords.FirstOrDefault(m => m.PatientId == emergencyCall.PatientId);
-                    if (patientMedicalRecord != null)
-                    {
-                        // Logic to send the medical records to the ambulance's smartphone
-                        // This can be simulated for now
-                    }
-                }
+                return NotFound();
             }
 
-            return RedirectToAction("Index");
+            var ambulance = await _context.Ambulances.FindAsync(id);
+            if (ambulance == null)
+            {
+                return NotFound();
+            }
+
+            ambulance.IsAvailable = !ambulance.IsAvailable; // Toggle the status
+            _context.Update(ambulance);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
+        // GET: Ambulances/SendMedicalRecords/5
+        public async Task<IActionResult> SendMedicalRecords(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var ambulance = await _context.Ambulances
+                .Include(a => a.CurrentEmergencyCall)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (ambulance == null || ambulance.CurrentEmergencyCall == null)
+            {
+                return NotFound();
+            }
+
+            var medicalRecord = await _context.MedicalRecords
+                .FirstOrDefaultAsync(m => m.PatientId == ambulance.CurrentEmergencyCall.PatientId);
+
+            if (medicalRecord == null)
+            {
+                return NotFound();
+            }
+
+            // Logic to send medical records to the ambulance
+            // This can be simulated for now as sending a notification or message
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Ambulances/Dashboard/5
+        public async Task<IActionResult> Dashboard(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var ambulance = await _context.Ambulances
+                .Include(a => a.CurrentEmergencyCall)
+                .ThenInclude(e => e.Patient)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (ambulance == null || ambulance.CurrentEmergencyCallId == null)
+            {
+                return NotFound();
+            }
+
+            var medicalRecord = await _context.MedicalRecords.FirstOrDefaultAsync(m => m.PatientId == ambulance.CurrentEmergencyCall.PatientId);
+
+            // Pass both the ambulance and medical record to the view
+            var viewModel = new AmbulanceDashboardViewModel
+            {
+                Ambulance = ambulance,
+                MedicalRecord = medicalRecord
+            };
+
+            return View(viewModel);
+        }
+
     }
 }

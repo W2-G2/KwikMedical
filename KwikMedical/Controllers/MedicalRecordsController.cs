@@ -18,8 +18,10 @@ public class MedicalRecordsController : Controller
     // GET: MedicalRecords
     public async Task<IActionResult> Index()
     {
-        return View(await _context.MedicalRecords.Include(m => m.Patient).ToListAsync());
+        var medicalRecords = _context.MedicalRecords.Include(m => m.Patient);
+        return View(await medicalRecords.ToListAsync());
     }
+
 
     // GET: MedicalRecords/Details/5
     public async Task<IActionResult> Details(int? id)
@@ -43,7 +45,7 @@ public class MedicalRecordsController : Controller
     // GET: MedicalRecords/Create
     public IActionResult Create()
     {
-        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id");
+        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName"); // Assuming you have a FullName property in Patient model
         return View();
     }
 
@@ -58,7 +60,7 @@ public class MedicalRecordsController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", medicalRecord.PatientId);
+        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
         return View(medicalRecord);
     }
 

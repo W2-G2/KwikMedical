@@ -1,0 +1,20 @@
+﻿<h2>Medical Records</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model)
+        {
+            <tr>
+                <td>@record.Patient.FirstName @record.Patient.LastName</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@record.Id">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

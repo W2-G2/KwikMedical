@@ -22,8 +22,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Views\Hospitals\" />
-    <Folder Include="Views\MedicalRecords\" />
   </ItemGroup>
 
 </Project>

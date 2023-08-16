@@ -23,5 +23,7 @@ namespace KwikMedical.Models
         public int? MedicalRecordId { get; set; }
         public MedicalRecord MedicalRecord { get; set; } // Navigation property
         public string Location { get; set; }
+        public double Latitude { get; set; }  // Simulated GPS Latitude
+        public double Longitude { get; set; } // Simulated GPS Longitude
     }
 }

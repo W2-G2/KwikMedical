@@ -1,0 +1,29 @@
+﻿<h2>Patients</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>NHS Number</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var patient in Model)
+        {
+            <tr>
+                <td>@patient.FirstName @patient.LastName</td>
+                <td>@patient.NHSNumber</td>
+                <td>@patient.Address, @patient.City, @patient.Postcode</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@patient.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@patient.Id">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<form asp-action="Index" method="get">
+    <input type="text" name="searchTerm" placeholder="Search by name or NHS number" />
+    <input type="submit" value="Search" />
+</form>

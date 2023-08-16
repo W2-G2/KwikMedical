@@ -1,0 +1,23 @@
+﻿<h2>Hospitals</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>City</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hospital in Model)
+        {
+            <tr>
+                <td>@hospital.Name</td>
+                <td>@hospital.City</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@hospital.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@hospital.Id">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

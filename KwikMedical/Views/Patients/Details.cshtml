@@ -1,0 +1,33 @@
+﻿@model KwikMedical.Models.Patient
+
+<h2>Patient Details</h2>
+
+<div>
+    <h4>Patient</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">First Name</dt>
+        <dd class="col-sm-10">@Model.FirstName</dd>
+
+        <dt class="col-sm-2">Last Name</dt>
+        <dd class="col-sm-10">@Model.LastName</dd>
+
+        <dt class="col-sm-2">NHS Number</dt>
+        <dd class="col-sm-10">@Model.NHSNumber</dd>
+
+        <dt class="col-sm-2">Address</dt>
+        <dd class="col-sm-10">@Model.Address</dd>
+
+        <dt class="col-sm-2">City</dt>
+        <dd class="col-sm-10">@Model.City</dd>
+
+        <dt class="col-sm-2">Postcode</dt>
+        <dd class="col-sm-10">@Model.Postcode</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<h3>Medical Record</h3>
+<a asp-action="Details" asp-controller="MedicalRecords" asp-route-id="@Model.MedicalRecord.Id">View Medical Record</a>

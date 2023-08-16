@@ -1,0 +1,31 @@
+﻿@model KwikMedical.Models.Ambulance
+
+<h2>Ambulance Details</h2>
+
+<div>
+    <h4>Ambulance</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Code</dt>
+        <dd class="col-sm-10">@Model.Code</dd>
+
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@Model.IsAvailable ? "Available" : "Not Available"</dd>
+
+        <dt class="col-sm-2">Current City</dt>
+        <dd class="col-sm-10">@Model.CurrentCity</dd>
+
+        <dt class="col-sm-2">Assigned Hospital</dt>
+        <dd class="col-sm-10">@Model.Hospital.Name</dd>
+
+        <dt class="col-sm-2">Current Latitude</dt>
+        <dd class="col-sm-10">@Model.Latitude</dd>
+
+        <dt class="col-sm-2">Current Longitude</dt>
+        <dd class="col-sm-10">@Model.Longitude</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a> |
+    <a asp-action="SendMedicalRecords" asp-route-id="@Model.Id">Send Medical Records</a>
+</div>

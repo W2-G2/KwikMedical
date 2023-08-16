@@ -1,0 +1,43 @@
+﻿<h2>@Model.Hospital.Name Dashboard</h2>
+
+<h3>Ongoing Emergencies</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Medical Condition</th>
+            <th>Ambulance Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emergency in Model.Emergencies)
+        {
+            <tr>
+                <td>@emergency.Patient.FirstName @emergency.Patient.LastName</td>
+                <td>@emergency.MedicalCondition</td>
+                <td>@emergency.Ambulance.Code</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Available Ambulances</h3>
+<ul>
+    @foreach (var ambulance in Model.AvailableAmbulances)
+    {
+        <li>@ambulance.Code</li>
+    }
+</ul>
+
+@if (Model.NewEmergencies.Count > 0)
+{
+    <div class="alert alert-info">
+        <strong>New Emergencies:</strong>
+        <ul>
+            @foreach (var emergency in Model.NewEmergencies)
+            {
+                <li>@emergency.Patient.FirstName @emergency.Patient.LastName - @emergency.MedicalCondition</li>
+            }
+        </ul>
+    </div>
+}

@@ -1,0 +1,25 @@
+﻿<h2>Emergency Calls</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Medical Condition</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var call in Model)
+        {
+            <tr>
+                <td>@call.Patient.FirstName @call.Patient.LastName</td>
+                <td>@call.MedicalCondition</td>
+                <td>@call.EmergencyStatus</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@call.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@call.Id">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

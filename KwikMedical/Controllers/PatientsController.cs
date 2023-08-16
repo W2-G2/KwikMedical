@@ -20,6 +20,20 @@ public class PatientsController : Controller
         return View(await _context.Patients.ToListAsync());
     }
 
+    public async Task<IActionResult> Index(string searchTerm)
+    {
+        var patients = from p in _context.Patients select p;
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            patients = patients.Where(p => p.FirstName.Contains(searchTerm)
+                                        || p.LastName.Contains(searchTerm)
+                                        || p.NHSNumber.Contains(searchTerm));
+        }
+
+        return View(await patients.ToListAsync());
+    }
+
     // GET: Patients/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -28,8 +42,7 @@ public class PatientsController : Controller
             return NotFound();
         }
 
-        var patient = await _context.Patients
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id);
         if (patient == null)
         {
             return NotFound();

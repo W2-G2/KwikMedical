@@ -1,0 +1,18 @@
+﻿@model KwikMedical.Models.MedicalRecord
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Create Medical Record</h2>
+
+<form asp-action="Create">
+    <!-- ... other input fields ... -->
+    <div class="form-group">
+        <label asp-for="PatientId" class="control-label"></label>
+        <select asp-for="PatientId" class="form-control" asp-items="ViewBag.PatientId"></select>
+    </div>
+    <!-- ... other input fields ... -->
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>

@@ -1,0 +1,18 @@
+﻿@model KwikMedical.Models.Patient
+
+<h2>Add New Patient</h2>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="FirstName">First Name</label>
+        <input asp-for="FirstName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="LastName">Last Name</label>
+        <input asp-for="LastName" class="form-control" />
+    </div>
+    <!-- ... other patient details ... -->
+    <div class="form-group">
+        <input type="submit" value="Add Patient" class="btn btn-primary" />
+    </div>
+</form>
