@@ -25,5 +25,7 @@ namespace KwikMedical.Models
         public string Location { get; set; }
         public double Latitude { get; set; }  // Simulated GPS Latitude
         public double Longitude { get; set; } // Simulated GPS Longitude
+        public int? AssignedAmbulanceId { get; set; }
+        public Ambulance AssignedAmbulance { get; set; }
     }
 }

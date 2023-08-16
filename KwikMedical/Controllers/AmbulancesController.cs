@@ -124,9 +124,10 @@ namespace KwikMedical.Controllers
             return View(viewModel);
         }
 
+        // GET: Ambulances/Create
         public IActionResult Create()
         {
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
+            ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Name");
             return View();
         }
 
