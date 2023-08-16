@@ -1,8 +1,12 @@
-﻿<h2>Medical Records</h2>
+﻿@model IEnumerable<KwikMedical.Models.MedicalRecord>
+
+<h2>Medical Records List</h2>
+
 <table class="table">
     <thead>
         <tr>
             <th>Patient</th>
+            <th>Clinical Notes</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -11,10 +15,15 @@
         {
             <tr>
                 <td>@record.Patient.FirstName @record.Patient.LastName</td>
+                <td>@record.ClinicalNotes</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@record.Id">Details</a>
+                    <a asp-action="Details" asp-route-id="@record.Id" class="btn btn-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@record.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@record.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<a asp-action="Create" class="btn btn-success">Add New Record</a>

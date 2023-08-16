@@ -42,28 +42,6 @@ public class MedicalRecordsController : Controller
         return View(medicalRecord);
     }
 
-    // GET: MedicalRecords/Create
-    public IActionResult Create()
-    {
-        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName"); // Assuming you have a FullName property in Patient model
-        return View();
-    }
-
-    // POST: MedicalRecords/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,LaboratoryReports,TelephoneCalls,Xrays,Letters,PrescriptionCharts,ClinicalNotes,PatientId")] MedicalRecord medicalRecord)
-    {
-        if (ModelState.IsValid)
-        {
-            _context.Add(medicalRecord);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
-        return View(medicalRecord);
-    }
-
     // GET: MedicalRecords/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
@@ -76,40 +54,6 @@ public class MedicalRecordsController : Controller
         if (medicalRecord == null)
         {
             return NotFound();
-        }
-        ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", medicalRecord.PatientId);
-        return View(medicalRecord);
-    }
-
-    // POST: MedicalRecords/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,LaboratoryReports,TelephoneCalls,Xrays,Letters,PrescriptionCharts,ClinicalNotes,PatientId")] MedicalRecord medicalRecord)
-    {
-        if (id != medicalRecord.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Update(medicalRecord);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MedicalRecordExists(medicalRecord.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
         }
         ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", medicalRecord.PatientId);
         return View(medicalRecord);
@@ -132,17 +76,6 @@ public class MedicalRecordsController : Controller
         }
 
         return View(medicalRecord);
-    }
-
-    // POST: MedicalRecords/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var medicalRecord = await _context.MedicalRecords.FindAsync(id);
-        _context.MedicalRecords.Remove(medicalRecord);
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
     }
 
     private bool MedicalRecordExists(int id)
@@ -179,4 +112,80 @@ public class MedicalRecordsController : Controller
 
         return Json(medicalRecord);
     }
+
+    public IActionResult Create()
+    {
+        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult Create(MedicalRecord medicalRecord)
+    {
+        if (ModelState.IsValid)
+        {
+            var patient = _context.Patients.Find(medicalRecord.PatientId);
+            if (patient == null)
+            {
+                ModelState.AddModelError("", "Patient not found in the database.");
+                ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+                return View(medicalRecord);
+            }
+
+            _context.MedicalRecords.Add(medicalRecord);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
+        return View(medicalRecord);
+    }
+
+    public IActionResult Edit(int id)
+    {
+        var medicalRecord = _context.MedicalRecords.Find(id);
+        if (medicalRecord == null)
+        {
+            return NotFound();
+        }
+        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
+        return View(medicalRecord);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(int id, MedicalRecord medicalRecord)
+    {
+        if (id != medicalRecord.Id)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            _context.Update(medicalRecord);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
+        return View(medicalRecord);
+    }
+
+    public IActionResult Delete(int id)
+    {
+        var medicalRecord = _context.MedicalRecords.Find(id);
+        if (medicalRecord == null)
+        {
+            return NotFound();
+        }
+        return View(medicalRecord);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        var medicalRecord = _context.MedicalRecords.Find(id);
+        _context.MedicalRecords.Remove(medicalRecord);
+        _context.SaveChanges();
+        return RedirectToAction(nameof(Index));
+    }
+
 }

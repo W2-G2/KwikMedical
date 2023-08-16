@@ -1,6 +1,7 @@
 ﻿using KwikMedical.Data;
 using KwikMedical.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace KwikMedical.Controllers
@@ -88,5 +89,73 @@ namespace KwikMedical.Controllers
 
             return View(viewModel);
         }
+
+        public IActionResult Create()
+        {
+            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(Ambulance ambulance)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Ambulances.Add(ambulance);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
+            return View(ambulance);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var ambulance = _context.Ambulances.Find(id);
+            if (ambulance == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
+            return View(ambulance);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, Ambulance ambulance)
+        {
+            if (id != ambulance.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(ambulance);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
+            return View(ambulance);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var ambulance = _context.Ambulances.Find(id);
+            if (ambulance == null)
+            {
+                return NotFound();
+            }
+            return View(ambulance);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var ambulance = _context.Ambulances.Find(id);
+            _context.Ambulances.Remove(ambulance);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

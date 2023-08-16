@@ -1,10 +1,13 @@
-﻿<h2>Emergency Calls</h2>
+﻿@model IEnumerable<KwikMedical.Models.EmergencyCall>
+
+<h2>Emergency Calls List</h2>
+
 <table class="table">
     <thead>
         <tr>
             <th>Patient</th>
-            <th>Medical Condition</th>
-            <th>Status</th>
+            <th>Emergency Details</th>
+            <th>Emergency City</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -13,13 +16,16 @@
         {
             <tr>
                 <td>@call.Patient.FirstName @call.Patient.LastName</td>
-                <td>@call.MedicalCondition</td>
-                <td>@call.EmergencyStatus</td>
+                <td>@call.EmergencyDetails</td>
+                <td>@call.EmergencyCity</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@call.Id">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@call.Id">Edit</a>
+                    <a asp-action="Details" asp-route-id="@call.Id" class="btn btn-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@call.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@call.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<a asp-action="Create" class="btn btn-success">Log New Call</a>

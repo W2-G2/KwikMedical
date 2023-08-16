@@ -3,191 +3,188 @@ using Microsoft.EntityFrameworkCore;
 using KwikMedical.Data;
 using KwikMedical.Models;
 
-namespace KwikMedical.Controllers;
-
-public class PatientsController : Controller
+namespace KwikMedical.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public PatientsController(ApplicationDbContext context)
+    public class PatientsController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: Patients
-    public async Task<IActionResult> Index()
-    {
-        return View(await _context.Patients.ToListAsync());
-    }
-
-    public async Task<IActionResult> Index(string searchTerm)
-    {
-        var patients = from p in _context.Patients select p;
-
-        if (!string.IsNullOrEmpty(searchTerm))
+        public PatientsController(ApplicationDbContext context)
         {
-            patients = patients.Where(p => p.FirstName.Contains(searchTerm)
-                                        || p.LastName.Contains(searchTerm)
-                                        || p.NHSNumber.Contains(searchTerm));
+            _context = context;
         }
 
-        return View(await patients.ToListAsync());
-    }
-
-    // GET: Patients/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        // GET: Patients
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            return View(await _context.Patients.ToListAsync());
         }
 
-        var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id);
-        if (patient == null)
+        // GET: Patients/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            return View(patient);
         }
 
-        return View(patient);
-    }
-
-    // GET: Patients/Create
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: Patients/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,NHSNumber,Address,City,Postcode")] Patient patient)
-    {
-        if (ModelState.IsValid)
+        // GET: Patients/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            _context.Add(patient);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients.FindAsync(id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+            return View(patient);
+        }
+
+        // GET: Patients/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            return View(patient);
+        }
+
+        private bool PatientExists(int id)
+        {
+            return _context.Patients.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FinalizePatient(int ambulanceId, string firstName, string lastName, string nhsNumber, string address, string city, string postcode)
+        {
+            var ambulance = await _context.Ambulances.FindAsync(ambulanceId);
+            if (ambulance == null)
+            {
+                return NotFound();
+            }
+
+            var patient = new Patient
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                NHSNumber = nhsNumber,
+                Address = address,
+                City = city,
+                Postcode = postcode
+            };
+
+            _context.Patients.Add(patient);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(patient);
-    }
 
-    // GET: Patients/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
+            var emergencyCall = await _context.EmergencyCalls.FindAsync(ambulance.CurrentEmergencyCallId);
+            if (emergencyCall != null)
+            {
+                _context.EmergencyCalls.Remove(emergencyCall);
+            }
 
-        var patient = await _context.Patients.FindAsync(id);
-        if (patient == null)
-        {
-            return NotFound();
-        }
-        return View(patient);
-    }
+            ambulance.CurrentEmergencyCallId = null;
+            ambulance.IsAvailable = true;
 
-    // POST: Patients/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,NHSNumber,Address,City,Postcode")] Patient patient)
-    {
-        if (id != patient.Id)
-        {
-            return NotFound();
+            _context.Update(ambulance);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Ambulances");
         }
 
-        if (ModelState.IsValid)
+        public IActionResult Create()
         {
-            try
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(Patient patient)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Patients.Add(patient);
+                _context.SaveChanges();
+
+                // Create an empty medical record for the new patient
+                var medicalRecord = new MedicalRecord
+                {
+                    PatientId = patient.Id
+                };
+                _context.MedicalRecords.Add(medicalRecord);
+                _context.SaveChanges();
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(patient);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var patient = _context.Patients.Find(id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+            return View(patient);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, Patient patient)
+        {
+            if (id != patient.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
             {
                 _context.Update(patient);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateConcurrencyException)
+            return View(patient);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var patient = _context.Patients.Find(id);
+            if (patient == null)
             {
-                if (!PatientExists(patient.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
+            return View(patient);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var patient = _context.Patients.Find(id);
+            _context.Patients.Remove(patient);
+            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
-        return View(patient);
-    }
 
-    // GET: Patients/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var patient = await _context.Patients
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (patient == null)
-        {
-            return NotFound();
-        }
-
-        return View(patient);
-    }
-
-    // POST: Patients/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var patient = await _context.Patients.FindAsync(id);
-        _context.Patients.Remove(patient);
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool PatientExists(int id)
-    {
-        return _context.Patients.Any(e => e.Id == id);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> FinalizePatient(int ambulanceId, string firstName, string lastName, string nhsNumber, string address, string city, string postcode)
-    {
-        var ambulance = await _context.Ambulances.FindAsync(ambulanceId);
-        if (ambulance == null)
-        {
-            return NotFound();
-        }
-
-        var patient = new Patient
-        {
-            FirstName = firstName,
-            LastName = lastName,
-            NHSNumber = nhsNumber,
-            Address = address,
-            City = city,
-            Postcode = postcode
-        };
-
-        _context.Patients.Add(patient);
-        await _context.SaveChangesAsync();
-
-        var emergencyCall = await _context.EmergencyCalls.FindAsync(ambulance.CurrentEmergencyCallId);
-        if (emergencyCall != null)
-        {
-            _context.EmergencyCalls.Remove(emergencyCall);
-        }
-
-        ambulance.CurrentEmergencyCallId = null;
-        ambulance.IsAvailable = true;
-
-        _context.Update(ambulance);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("Index", "Ambulances");
     }
 }

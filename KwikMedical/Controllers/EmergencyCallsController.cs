@@ -70,92 +70,49 @@ namespace KwikMedical.Controllers
             return View(emergencyCall);
         }
 
-        // GET: EmergencyCalls/Create
-        public IActionResult Create()
-        {
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName"); // Assuming you have a FullName property in Patient model
-            return View();
-        }
-
-        // POST: EmergencyCalls/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EmergencyDetails,EmergencyCity,...")] EmergencyCall emergencyCall)
+        public IActionResult Create(EmergencyCall emergencyCall)
         {
             if (ModelState.IsValid)
             {
-                // Find an available ambulance
-                var availableAmbulance = await _context.Ambulances.FirstOrDefaultAsync(a => a.IsAvailable == true);
-                double emergencyLatitude = 56.4907;  // Example latitude
-                double emergencyLongitude = -4.2026; // Example longitude
-
-                if (availableAmbulance != null)
+                // 1. Check the patient's information against the existing database.
+                var patient = _context.Patients.Find(emergencyCall.PatientId);
+                if (patient == null)
                 {
-                    availableAmbulance.IsAvailable = false; // Mark the ambulance as unavailable
-                    emergencyCall.AmbulanceId = availableAmbulance.Id; // Assign the ambulance to the emergency call
-
-                    // Send medical records to the ambulance
-                    var medicalRecord = await _context.MedicalRecords.FirstOrDefaultAsync(m => m.PatientId == emergencyCall.PatientId);
-                    if (medicalRecord != null)
-                    {
-                        // Logic to send medical records to the ambulance. 
-                        // This can be a simulated action, such as updating a field in the ambulance record indicating that medical records have been sent.
-                        availableAmbulance.CurrentEmergencyCallId = emergencyCall.Id;
-                    }
-
-                    // Assign a random hospital as the nearest hospital (for demo purposes)
-                    var hospitals = await _context.Hospitals.ToListAsync();
-                    if (hospitals.Any())
-                    {
-                        var randomHospital = hospitals[new Random().Next(hospitals.Count)];
-                        emergencyCall.NearestHospital = randomHospital.Name;
-                    }
-                    Task.Run(() => SimulateAmbulanceMovement(availableAmbulance, emergencyCall, emergencyLatitude, emergencyLongitude));
-
-                    // Calculate ETA based on simulated distance and speed
-                    double distance = CalculateDistance(availableAmbulance.Latitude, availableAmbulance.Longitude, emergencyLatitude, emergencyLongitude);
-                    double speed = 60.0; // 60 km/h for simplicity
-                    double timeHours = distance / speed;
-                    emergencyCall.EstimatedArrivalTime = DateTime.Now.AddHours(timeHours);
-
-                    _context.Update(emergencyCall);
-                    await _context.SaveChangesAsync();
-
-                    // Notify the nearest hospital
-                    NotifyHospital(emergencyCall.NearestHospital, emergencyCall);
-
-                    // Assign the nearest available ambulance based on city
-                    var nearestAmbulance = _context.Ambulances
-                        .Where(a => a.IsAvailable && a.CurrentCity == emergencyCall.EmergencyCity)
-                        .FirstOrDefault();
-
-                    // If no ambulance is available in the same city, assign any available ambulance
-                    if (nearestAmbulance == null)
-                    {
-                        nearestAmbulance = _context.Ambulances
-                            .Where(a => a.IsAvailable)
-                            .FirstOrDefault();
-                    }
-
-                    if (nearestAmbulance != null)
-                    {
-                        nearestAmbulance.IsAvailable = false;
-                        nearestAmbulance.CurrentEmergencyCallId = emergencyCall.Id;
-                        _context.Update(nearestAmbulance);
-                    }
-
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("", "Patient not found in the database.");
+                    ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+                    return View(emergencyCall);
                 }
 
-                _context.Add(emergencyCall);
-                await _context.SaveChangesAsync();
+                // 2. Determine the best way to help the patient.
+                // This can be enhanced with more complex logic. For now, we'll just log the patient's medical condition.
+                var medicalCondition = emergencyCall.MedicalCondition;
+
+                // 3. Generate an ambulance rescue request to one of the regional hospitals.
+                // For simplicity, we'll assign the nearest available ambulance from the patient's city.
+                var availableAmbulance = _context.Ambulances
+                    .FirstOrDefault(a => a.IsAvailable && a.CurrentCity == patient.City);
+                if (availableAmbulance == null)
+                {
+                    ModelState.AddModelError("", "No available ambulances in the patient's city.");
+                    ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+                    return View(emergencyCall);
+                }
+                availableAmbulance.IsAvailable = false; // Mark the ambulance as occupied
+                _context.Update(availableAmbulance);
+
+                emergencyCall.AmbulanceId = availableAmbulance.Id;
+
+                // 4. Extract the patient’s medical records and simulate sending them to an ambulance's smartphone.
+                var medicalRecords = _context.MedicalRecords.Where(m => m.PatientId == emergencyCall.PatientId).ToList();
+                // For now, we'll just log that the records were "sent" to the ambulance. 
+                // In a real-world scenario, this would involve some API call or other mechanism to send the data.
+
+                _context.EmergencyCalls.Add(emergencyCall);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
-            // Notify the nearest hospital
-            NotifyHospital(emergencyCall.NearestHospital, emergencyCall);
-
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "FullName", emergencyCall.PatientId);
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", emergencyCall.PatientId);
             return View(emergencyCall);
         }
 
@@ -234,5 +191,60 @@ namespace KwikMedical.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult Create()
+        {
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+            return View();
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var emergencyCall = _context.EmergencyCalls.Find(id);
+            if (emergencyCall == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", emergencyCall.PatientId);
+            return View(emergencyCall);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, EmergencyCall emergencyCall)
+        {
+            if (id != emergencyCall.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(emergencyCall);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", emergencyCall.PatientId);
+            return View(emergencyCall);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var emergencyCall = _context.EmergencyCalls.Find(id);
+            if (emergencyCall == null)
+            {
+                return NotFound();
+            }
+            return View(emergencyCall);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var emergencyCall = _context.EmergencyCalls.Find(id);
+            _context.EmergencyCalls.Remove(emergencyCall);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

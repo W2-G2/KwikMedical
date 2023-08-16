@@ -1,25 +1,25 @@
 ﻿@model KwikMedical.Models.EmergencyCall
-@{
-    ViewData["Title"] = "Create";
-}
 
-<h2>Create Emergency Call</h2>
+<h2>Log New Emergency Call</h2>
 
 <form asp-action="Create">
     <div class="form-group">
-        <label asp-for="Patient.FirstName">Patient First Name</label>
-        <input asp-for="Patient.FirstName" class="form-control" />
+        <label asp-for="PatientId">Patient</label>
+        <select asp-for="PatientId" asp-items="ViewBag.Patients" class="form-control"></select>
     </div>
     <div class="form-group">
-        <label asp-for="Patient.LastName">Patient Last Name</label>
-        <input asp-for="Patient.LastName" class="form-control" />
+        <label asp-for="EmergencyDetails">Emergency Details</label>
+        <textarea asp-for="EmergencyDetails" class="form-control" required></textarea>
     </div>
-    <!-- ... other patient details ... -->
+    <div class="form-group">
+        <label asp-for="EmergencyCity">Emergency City</label>
+        <input asp-for="EmergencyCity" class="form-control" required />
+    </div>
     <div class="form-group">
         <label asp-for="MedicalCondition">Medical Condition</label>
-        <textarea asp-for="MedicalCondition" class="form-control"></textarea>
+        <input asp-for="MedicalCondition" class="form-control" required />
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Log Call" class="btn btn-primary" />
     </div>
 </form>

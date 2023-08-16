@@ -1,4 +1,7 @@
-﻿<h2>Hospitals</h2>
+﻿@model IEnumerable<KwikMedical.Models.Hospital>
+
+<h2>Hospitals List</h2>
+
 <table class="table">
     <thead>
         <tr>
@@ -14,10 +17,13 @@
                 <td>@hospital.Name</td>
                 <td>@hospital.City</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@hospital.Id">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@hospital.Id">Edit</a>
+                    <a asp-action="Details" asp-route-id="@hospital.Id" class="btn btn-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@hospital.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@hospital.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<a asp-action="Create" class="btn btn-success">Add New Hospital</a>

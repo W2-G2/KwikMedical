@@ -1,4 +1,7 @@
-﻿<h2>Patients</h2>
+﻿@model IEnumerable<KwikMedical.Models.Patient>
+
+<h2>Patients List</h2>
+
 <table class="table">
     <thead>
         <tr>
@@ -16,14 +19,13 @@
                 <td>@patient.NHSNumber</td>
                 <td>@patient.Address, @patient.City, @patient.Postcode</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@patient.Id">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@patient.Id">Edit</a>
+                    <a asp-action="Details" asp-route-id="@patient.Id" class="btn btn-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@patient.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@patient.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<form asp-action="Index" method="get">
-    <input type="text" name="searchTerm" placeholder="Search by name or NHS number" />
-    <input type="submit" value="Search" />
-</form>
+
+<a asp-action="Create" class="btn btn-success">Add New Patient</a>

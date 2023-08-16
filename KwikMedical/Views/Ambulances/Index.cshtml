@@ -1,10 +1,13 @@
-﻿<h2>Ambulances</h2>
+﻿@model IEnumerable<KwikMedical.Models.Ambulance>
+
+<h2>Ambulances List</h2>
+
 <table class="table">
     <thead>
         <tr>
             <th>Code</th>
-            <th>Status</th>
             <th>Current City</th>
+            <th>Assigned Hospital</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -13,14 +16,16 @@
         {
             <tr>
                 <td>@ambulance.Code</td>
-                <td>@(ambulance.IsAvailable ? "Available" : "On Call")</td>
                 <td>@ambulance.CurrentCity</td>
+                <td>@ambulance.Hospital.Name</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@ambulance.Id">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@ambulance.Id">Edit</a> |
-                    <a asp-action="Dashboard" asp-route-id="@ambulance.Id">Dashboard</a>
+                    <a asp-action="Details" asp-route-id="@ambulance.Id" class="btn btn-info">View</a>
+                    <a asp-action="Edit" asp-route-id="@ambulance.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@ambulance.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<a asp-action="Create" class="btn btn-success">Add New Ambulance</a>
