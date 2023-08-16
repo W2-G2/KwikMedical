@@ -29,5 +29,6 @@ namespace KwikMedical.Models
         public string Postcode { get; set; }
 
         public virtual MedicalRecord MedicalRecord { get; set; }
+        public ICollection<EmergencyCall> EmergencyCalls { get; set; }  // Add this line
     }
 }

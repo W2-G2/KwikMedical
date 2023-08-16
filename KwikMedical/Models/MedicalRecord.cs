@@ -19,5 +19,7 @@ namespace KwikMedical.Models
         [ForeignKey("Patient")]
         public int PatientId { get; set; }
         public virtual Patient Patient { get; set; }
+        public int? AmbulanceId { get; set; }
+        public Ambulance Ambulance { get; set; }  // Add this line
     }
 }

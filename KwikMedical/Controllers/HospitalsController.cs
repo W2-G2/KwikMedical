@@ -3,32 +3,18 @@ using KwikMedical.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KwikMedical.Controllers
 {
-    public class HospitalController : Controller
+    public class HospitalsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public HospitalController(ApplicationDbContext context)
+        public HospitalsController(ApplicationDbContext context)
         {
             _context = context;
-        }
-
-        public IActionResult UpdatePatientRecord(int emergencyCallId, string actionTaken, string timeSpent)
-        {
-            var emergencyCall = _context.EmergencyCalls.FirstOrDefault(e => e.Id == emergencyCallId);
-            if (emergencyCall != null)
-            {
-                // Logic to update the patient's record with the call-out details
-                // This can include details like who, what, when, where, any action taken, and length of time spent on the call
-
-                emergencyCall.EmergencyStatus = "Completed";
-                _context.EmergencyCalls.Update(emergencyCall);
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction("Index");
         }
 
         // GET: Hospitals
@@ -54,7 +40,26 @@ namespace KwikMedical.Controllers
             return View(hospital);
         }
 
-        public async Task<IActionResult> Dashboard(int? id)
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Name,City")] Hospital hospital)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(hospital);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(hospital);
+        }
+
+        // GET: Hospitals/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -66,96 +71,74 @@ namespace KwikMedical.Controllers
             {
                 return NotFound();
             }
-
-            var ongoingEmergencies = _context.EmergencyCalls
-                .Where(e => !e.IsCompleted && e.NearestHospital == hospital.Name)
-                .ToList();
-
-            var availableAmbulances = _context.Ambulances
-                .Where(a => a.IsAvailable && a.HospitalId == hospital.Id)
-                .ToList();
-
-            var newEmergencies = _context.EmergencyCalls
-                .Where(e => !e.IsCompleted && e.Timestamp > DateTime.Now.AddHours(-1) && e.NearestHospital == hospital.Name)
-                .ToList();
-
-            var viewModel = new HospitalDashboardViewModel
-            {
-                Hospital = hospital,
-                Emergencies = ongoingEmergencies,
-                AvailableAmbulances = availableAmbulances,
-                NewEmergencies = newEmergencies
-            };
-
-            return View(viewModel);
+            return View(hospital);
         }
 
-        public IActionResult Create()
-        {
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
-            return View();
-        }
-
+        // POST: Hospitals/Edit/5
         [HttpPost]
-        public IActionResult Create(Ambulance ambulance)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Hospital hospital)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Ambulances.Add(ambulance);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
-            return View(ambulance);
-        }
-
-        public IActionResult Edit(int id)
-        {
-            var ambulance = _context.Ambulances.Find(id);
-            if (ambulance == null)
-            {
-                return NotFound();
-            }
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
-            return View(ambulance);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(int id, Ambulance ambulance)
-        {
-            if (id != ambulance.Id)
+            if (id != hospital.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                _context.Update(ambulance);
-                _context.SaveChanges();
+                try
+                {
+                    _context.Update(hospital);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!HospitalExists(hospital.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
-            return View(ambulance);
+            return View(hospital);
         }
 
-        public IActionResult Delete(int id)
+        // GET: Hospitals/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            var ambulance = _context.Ambulances.Find(id);
-            if (ambulance == null)
+            if (id == null)
             {
                 return NotFound();
             }
-            return View(ambulance);
+
+            var hospital = await _context.Hospitals
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (hospital == null)
+            {
+                return NotFound();
+            }
+
+            return View(hospital);
         }
 
+        // POST: Hospitals/Delete/5
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ambulance = _context.Ambulances.Find(id);
-            _context.Ambulances.Remove(ambulance);
-            _context.SaveChanges();
+            var hospital = await _context.Hospitals.FindAsync(id);
+            _context.Hospitals.Remove(hospital);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        private bool HospitalExists(int id)
+        {
+            return _context.Hospitals.Any(e => e.Id == id);
+        }
     }
 }
