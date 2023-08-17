@@ -1,22 +1,15 @@
 ﻿@model KwikMedical.Models.Ambulance
 
-<h2>Add New Ambulance</h2>
+<h1>Create New Ambulance</h1>
 
 <form asp-action="Create">
     <div class="form-group">
-        <label asp-for="Code">Ambulance Code</label>
-        <input asp-for="Code" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label asp-for="CurrentCity">Current City</label>
-        <input asp-for="CurrentCity" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label asp-for="HospitalId" class="control-label"></label>
+        <label asp-for="HospitalId" class="control-label">Select Hospital</label>
         <select asp-for="HospitalId" class="form-control" asp-items="ViewBag.HospitalId"></select>
-        <span asp-validation-for="HospitalId" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <input type="submit" value="Add Ambulance" class="btn btn-primary" />
+        <input type="submit" value="Create" class="btn btn-primary" />
     </div>
 </form>
+

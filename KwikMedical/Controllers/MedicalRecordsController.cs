@@ -122,62 +122,63 @@ public class MedicalRecordsController : Controller
     [HttpPost]
     public IActionResult Create(MedicalRecord medicalRecord)
     {
-        if (ModelState.IsValid)
-        {
-            var patient = _context.Patients.Find(medicalRecord.PatientId);
-            if (patient == null)
-            {
-                ModelState.AddModelError("", "Patient not found in the database.");
-                ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
-                return View(medicalRecord);
-            }
+        // Set default values for MedicalRecord fields if they are null or empty
+        if (string.IsNullOrEmpty(medicalRecord.LaboratoryReports)) medicalRecord.LaboratoryReports = "N/A";
+        if (string.IsNullOrEmpty(medicalRecord.TelephoneCalls)) medicalRecord.TelephoneCalls = "N/A";
+        if (string.IsNullOrEmpty(medicalRecord.Xrays)) medicalRecord.Xrays = "N/A";
+        if (string.IsNullOrEmpty(medicalRecord.Letters)) medicalRecord.Letters = "N/A";
+        if (string.IsNullOrEmpty(medicalRecord.PrescriptionCharts)) medicalRecord.PrescriptionCharts = "N/A";
+        if (string.IsNullOrEmpty(medicalRecord.ClinicalNotes)) medicalRecord.ClinicalNotes = "N/A";
 
-            _context.MedicalRecords.Add(medicalRecord);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
-        }
-        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
-        return View(medicalRecord);
-    }
-
-    public IActionResult Edit(int id)
-    {
-        var medicalRecord = _context.MedicalRecords.Find(id);
-        if (medicalRecord == null)
+        var patient = _context.Patients.Find(medicalRecord.PatientId);
+        if (patient == null)
         {
-            return NotFound();
+            ModelState.AddModelError("", "Patient not found in the database.");
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+            return View(medicalRecord);
         }
-        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
-        return View(medicalRecord);
+
+        _context.MedicalRecords.Add(medicalRecord);
+        _context.SaveChanges();
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
-    public IActionResult Edit(int id, MedicalRecord medicalRecord)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,LaboratoryReports,TelephoneCalls,Xrays,Letters,PrescriptionCharts,ClinicalNotes,PatientId")] MedicalRecord medicalRecord)
     {
         if (id != medicalRecord.Id)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        // Setting default values if not provided
+        medicalRecord.LaboratoryReports = medicalRecord.LaboratoryReports ?? "Default Laboratory Reports";
+        medicalRecord.TelephoneCalls = medicalRecord.TelephoneCalls ?? "Default Telephone Calls";
+        medicalRecord.Xrays = medicalRecord.Xrays ?? "Default Xrays";
+        medicalRecord.Letters = medicalRecord.Letters ?? "Default Letters";
+        medicalRecord.PrescriptionCharts = medicalRecord.PrescriptionCharts ?? "Default Prescription Charts";
+        medicalRecord.ClinicalNotes = medicalRecord.ClinicalNotes ?? "Default Clinical Notes";
+
+        try
         {
             _context.Update(medicalRecord);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
+            await _context.SaveChangesAsync();
         }
-        ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName", medicalRecord.PatientId);
-        return View(medicalRecord);
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!MedicalRecordExists(medicalRecord.Id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return RedirectToAction(nameof(Index));
     }
 
-    public IActionResult Delete(int id)
-    {
-        var medicalRecord = _context.MedicalRecords.Find(id);
-        if (medicalRecord == null)
-        {
-            return NotFound();
-        }
-        return View(medicalRecord);
-    }
 
     [HttpPost, ActionName("Delete")]
     public IActionResult DeleteConfirmed(int id)

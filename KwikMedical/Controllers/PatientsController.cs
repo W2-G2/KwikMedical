@@ -122,22 +122,25 @@ namespace KwikMedical.Controllers
         [HttpPost]
         public IActionResult Create(Patient patient)
         {
-            if (ModelState.IsValid)
+            _context.Patients.Add(patient);
+            _context.SaveChanges();
+
+            // Create an empty medical record for the new patient
+            var medicalRecord = new MedicalRecord
             {
-                _context.Patients.Add(patient);
-                _context.SaveChanges();
+                PatientId = patient.Id,
+                LaboratoryReports = "N/A",
+                TelephoneCalls = "N/A",
+                Xrays = "N/A",
+                Letters = "N/A",
+                PrescriptionCharts = "N/A",
+                ClinicalNotes = "N/A"
+            };
 
-                // Create an empty medical record for the new patient
-                var medicalRecord = new MedicalRecord
-                {
-                    PatientId = patient.Id
-                };
-                _context.MedicalRecords.Add(medicalRecord);
-                _context.SaveChanges();
+            _context.MedicalRecords.Add(medicalRecord);
+            _context.SaveChanges();
 
-                return RedirectToAction(nameof(Index));
-            }
-            return View(patient);
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Edit(int id)

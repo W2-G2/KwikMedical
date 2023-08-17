@@ -124,7 +124,6 @@ namespace KwikMedical.Controllers
             return View(viewModel);
         }
 
-        // GET: Ambulances/Create
         public IActionResult Create()
         {
             ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Name");
@@ -132,24 +131,24 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Ambulance ambulance)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("HospitalId")] Ambulance ambulance)
         {
-            if (ModelState.IsValid)
+            var associatedHospital = _context.Hospitals.Find(ambulance.HospitalId);
+            if (associatedHospital != null)
             {
-                var hospital = _context.Hospitals.Find(ambulance.HospitalId);
-                if (hospital == null)
-                {
-                    ModelState.AddModelError("", "Hospital not found in the database.");
-                    ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name");
-                    return View(ambulance);
-                }
-
-                _context.Ambulances.Add(ambulance);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                ambulance.Location = associatedHospital.City;
+                ambulance.CurrentCity = associatedHospital.City;
             }
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
-            return View(ambulance);
+
+            ambulance.Code = "Ambulance-" + DateTime.Now.Ticks; // Generating a unique code based on the current timestamp
+            ambulance.IsAvailable = true; // Setting the ambulance as available by default
+            ambulance.Latitude = 0.0; // Default value
+            ambulance.Longitude = 0.0; // Default value
+
+            _context.Add(ambulance);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Edit(int id)
@@ -171,14 +170,9 @@ namespace KwikMedical.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                _context.Update(ambulance);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Hospitals = new SelectList(_context.Hospitals, "Id", "Name", ambulance.HospitalId);
-            return View(ambulance);
+            _context.Update(ambulance);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Delete(int id)

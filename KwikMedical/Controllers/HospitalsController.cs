@@ -47,15 +47,17 @@ namespace KwikMedical.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,City")] Hospital hospital)
+        public async Task<IActionResult> Create([Bind("Id,Name,City,PreparationStatus")] Hospital hospital)
         {
-            if (ModelState.IsValid)
+            // Set default value for PreparationStatus if not provided
+            if (string.IsNullOrEmpty(hospital.PreparationStatus))
             {
-                _context.Add(hospital);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                hospital.PreparationStatus = "DefaultStatus";
             }
-            return View(hospital);
+
+            _context.Add(hospital);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Hospitals/Edit/5

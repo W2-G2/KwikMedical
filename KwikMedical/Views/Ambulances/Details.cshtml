@@ -4,8 +4,9 @@
 
 <p>
     <strong>Code:</strong> @Model.Code <br>
-    <strong>Current City:</strong> @Model.CurrentCity <br>
-    <strong>Assigned Hospital:</strong> @Model.Hospital.Name
+    <strong>Location:</strong> @Model.Location <br>
+    <strong>Assigned Hospital:</strong> @Model.Hospital.Name <br>
+    <strong>City:</strong> @Model.Hospital.City
 </p>
 
 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>

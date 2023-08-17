@@ -1,37 +1,61 @@
 ﻿@model KwikMedical.Models.MedicalRecord
 
-<h2>Add Medical Record</h2>
+<h2>Create Medical Record</h2>
 
 <form asp-action="Create">
     <div class="form-group">
-        <label asp-for="PatientId">Patient</label>
-        <select asp-for="PatientId" asp-items="ViewBag.Patients" class="form-control"></select>
+        <label asp-for="LaboratoryReports" class="control-label"></label>
+        <input asp-for="LaboratoryReports" class="form-control" />
+        <span asp-validation-for="LaboratoryReports" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="ClinicalNotes">Clinical Notes</label>
-        <textarea asp-for="ClinicalNotes" class="form-control"></textarea>
+        <label asp-for="TelephoneCalls" class="control-label"></label>
+        <input asp-for="TelephoneCalls" class="form-control" />
+        <span asp-validation-for="TelephoneCalls" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="LaboratoryReports">Laboratory Reports</label>
-        <textarea asp-for="LaboratoryReports" class="form-control"></textarea>
+        <label asp-for="Xrays" class="control-label"></label>
+        <input asp-for="Xrays" class="form-control" />
+        <span asp-validation-for="Xrays" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Xrays">X-rays</label>
-        <textarea asp-for="Xrays" class="form-control"></textarea>
+        <label asp-for="Letters" class="control-label"></label>
+        <input asp-for="Letters" class="form-control" />
+        <span asp-validation-for="Letters" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Letters">Letters</label>
-        <textarea asp-for="Letters" class="form-control"></textarea>
+        <label asp-for="PrescriptionCharts" class="control-label"></label>
+        <input asp-for="PrescriptionCharts" class="form-control" />
+        <span asp-validation-for="PrescriptionCharts" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="PrescriptionCharts">Prescription Charts</label>
-        <textarea asp-for="PrescriptionCharts" class="form-control"></textarea>
+        <label asp-for="ClinicalNotes" class="control-label"></label>
+        <input asp-for="ClinicalNotes" class="form-control" />
+        <span asp-validation-for="ClinicalNotes" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="TelephoneCalls">Telephone Calls</label>
-        <textarea asp-for="TelephoneCalls" class="form-control"></textarea>
+        <label asp-for="PatientId" class="control-label"></label>
+        <select asp-for="PatientId" class="form-control" asp-items="ViewBag.Patients"></select>
+        <span asp-validation-for="PatientId" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <input type="submit" value="Add Record" class="btn btn-primary" />
+        <input type="submit" value="Create" class="btn btn-primary" />
     </div>
 </form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
