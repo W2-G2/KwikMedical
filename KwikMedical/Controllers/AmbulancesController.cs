@@ -235,21 +235,31 @@ namespace KwikMedical.Controllers
         public IActionResult UpdateMedicalRecord(int medicalRecordId, MedicalRecord updatedMedicalRecord)
         {
             var medicalRecord = _context.MedicalRecords.FirstOrDefault(mr => mr.Id == medicalRecordId);
+
             if (medicalRecord == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Medical record not found." });
             }
 
-            // Update the medical record fields
+            // Update all fields of the MedicalRecord
+            medicalRecord.ClinicalNotes = updatedMedicalRecord.ClinicalNotes;
             medicalRecord.LaboratoryReports = updatedMedicalRecord.LaboratoryReports;
+            medicalRecord.Letters = updatedMedicalRecord.Letters;
+            medicalRecord.PrescriptionCharts = updatedMedicalRecord.PrescriptionCharts;
             medicalRecord.TelephoneCalls = updatedMedicalRecord.TelephoneCalls;
-            // ... Update other fields as needed
+            medicalRecord.Xrays = updatedMedicalRecord.Xrays;
 
-            _context.Update(medicalRecord);
-            _context.SaveChanges();
-
-            return Ok();
+            try
+            {
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error updating the medical record." });
+            }
         }
+
 
         [HttpPost]
         public IActionResult CompleteEmergencyCall(int emergencyCallId)
@@ -257,14 +267,35 @@ namespace KwikMedical.Controllers
             var emergencyCall = _context.EmergencyCalls.FirstOrDefault(ec => ec.Id == emergencyCallId);
             if (emergencyCall == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Emergency call not found." });
             }
 
-            emergencyCall.IsCompleted = true;
-            _context.Update(emergencyCall);
-            _context.SaveChanges();
+            var ambulance = _context.Ambulances.FirstOrDefault(a => a.Id == emergencyCall.AmbulanceId);
+            if (ambulance == null)
+            {
+                return Json(new { success = false, message = "Associated ambulance not found." });
+            }
 
-            return Ok();
+            try
+            {
+                // Mark the emergency call as completed
+                emergencyCall.IsCompleted = true;
+                _context.Update(emergencyCall);
+
+                // Update the ambulance's availability
+                ambulance.IsAvailable = true;
+                ambulance.CurrentEmergencyCallId = null;
+                _context.Update(ambulance);
+
+                _context.SaveChanges();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error completing the emergency call." });
+            }
         }
+
     }
 }
