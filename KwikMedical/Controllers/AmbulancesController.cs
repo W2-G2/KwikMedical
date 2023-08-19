@@ -232,27 +232,31 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateMedicalRecord([FromBody] UpdatedMedicalRecordModel model)
+        public async Task<IActionResult> UpdateMedicalRecord([FromBody] MedicalRecord updatedRecord)
         {
-            Console.WriteLine("UpdateMedicalRecord method was called.");
-            var medicalRecord = await _context.MedicalRecords.FindAsync(model.EmergencyCallId);
-            if (medicalRecord == null)
+            if (updatedRecord == null || updatedRecord.Id == 0)
             {
-                return NotFound();
+                return BadRequest("Invalid request payload.");
             }
 
-            medicalRecord.ClinicalNotes = model.ClinicalNotes;
-            medicalRecord.LaboratoryReports = model.LaboratoryReports;
-            medicalRecord.Letters = model.Letters;
-            medicalRecord.PrescriptionCharts = model.PrescriptionCharts;
-            medicalRecord.TelephoneCalls = model.TelephoneCalls;
-            medicalRecord.Xrays = model.Xrays;
+            var existingRecord = await _context.MedicalRecords.FindAsync(updatedRecord.Id);
+            if (existingRecord == null)
+            {
+                return NotFound($"Medical record with ID {updatedRecord.Id} not found.");
+            }
 
-            _context.Update(medicalRecord);
+            existingRecord.ClinicalNotes = updatedRecord.ClinicalNotes;
+            existingRecord.LaboratoryReports = updatedRecord.LaboratoryReports;
+            existingRecord.Letters = updatedRecord.Letters;
+            existingRecord.PrescriptionCharts = updatedRecord.PrescriptionCharts;
+            existingRecord.TelephoneCalls = updatedRecord.TelephoneCalls;
+            existingRecord.Xrays = updatedRecord.Xrays;
+
             await _context.SaveChangesAsync();
 
             return Ok();
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CompleteEmergencyCall(int emergencyCallId)

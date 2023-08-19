@@ -80,7 +80,7 @@
                         <input type="text" id="medicalRecordXrays" />
                         <br>
 
-                        <input type="hidden" id="hiddenEmergencyCallId" />
+                        <input type="hidden" id="hiddenMedicalRecordId" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -124,7 +124,7 @@
                     document.getElementById('medicalRecordXrays').value = data.medicalRecord.xrays;
 
                     // Set the value of the hidden input field to the emergencyCallId
-                    document.getElementById('hiddenEmergencyCallId').value = data.emergencyCallId;
+                    document.getElementById('hiddenMedicalRecordId').value = data.medicalRecord.id;
 
                 }, 5000);  // 5 seconds for the animation
 
@@ -135,18 +135,19 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('updateMedicalRecordBtn').addEventListener('click', function () {
-            const emergencyCallId = document.getElementById('hiddenEmergencyCallId').value;
+            const emergencyCallId = document.getElementById('hiddenMedicalRecordId').value;
             const updatedMedicalRecord = {
+                Id: document.getElementById('hiddenMedicalRecordId').value,  // Add this line
                 clinicalNotes: document.getElementById('medicalRecordClinicalNotes').value,
                 laboratoryReports: document.getElementById('medicalRecordLaboratoryReports').value,
                 letters: document.getElementById('medicalRecordLetters').value,
                 prescriptionCharts: document.getElementById('medicalRecordPrescriptionCharts').value,
                 telephoneCalls: document.getElementById('medicalRecordTelephoneCalls').value,
-                xrays: document.getElementById('medicalRecordXrays').value,
-                emergencyCallId: emergencyCallId
+                xrays: document.getElementById('medicalRecordXrays').value
             };
 
-            fetch('https://localhost:44321/Ambulances/UpdateMedicalRecord', {
+
+            fetch('/Ambulances/UpdateMedicalRecord', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
