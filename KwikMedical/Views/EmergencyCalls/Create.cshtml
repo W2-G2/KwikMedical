@@ -1,13 +1,98 @@
 ﻿@model KwikMedical.Models.EmergencyCall
+@{
+    ViewBag.Title = "Create Emergency Call";
+}
 
-<h2>Log New Emergency Call</h2>
+<h2>Create Emergency Call</h2>
 
-<<form asp-action="Create" asp-controller="EmergencyCalls" method="post">
+<form asp-action="Create">
     <div class="form-group">
-        <label for="NHSNumber">Patient's NHS Number</label>
+        <label for="NHSNumber">NHS Number:</label>
         <input type="text" id="NHSNumber" name="NHSNumber" class="form-control" required />
+        <button type="button" class="btn btn-primary" onclick="fetchPatientDetails()">Fetch Patient Details</button>
     </div>
-    <div class="form-group">
-        <input type="submit" value="Log Call" class="btn btn-primary" />
+
+    <!-- Bootstrap Modal for displaying patient details and emergency details -->
+    <div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="patientModalLabel">Patient Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Patient details will be populated via JavaScript -->
+                    <div id="patientDetails"></div>
+
+                    <!-- Emergency details form -->
+                    <div>
+                        <label for="EmergencyDetails">Emergency Details:</label>
+                        <textarea id="EmergencyDetails" name="EmergencyDetails" class="form-control" required></textarea>
+
+                        <label for="EmergencyCity">Emergency City:</label>
+                        <input type="text" id="EmergencyCity" name="EmergencyCity" class="form-control" required />
+
+                        <label for="EmergencyStatus">Emergency Status:</label>
+                        <input type="text" id="EmergencyStatus" name="EmergencyStatus" class="form-control" required />
+
+                        <label for="OperatorName">Operator Name:</label>
+                        <input type="text" id="OperatorName" name="OperatorName" class="form-control" required />
+
+                        <label for="MedicalCondition">Medical Condition:</label>
+                        <input type="text" id="MedicalCondition" name="MedicalCondition" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" onclick="showCallAnimation()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animation for call being forwarded -->
+    <div id="callAnimation" style="display: none;">
+        <!-- You can use a GIF or CSS animations here -->
+        <img src="path_to_animation.gif" alt="Call being forwarded" />
     </div>
 </form>
+
+<script>
+    function fetchPatientDetails() {
+        var nhsNumber = document.getElementById('NHSNumber').value;
+        fetch('/EmergencyCalls/GetPatientDetails?nhsNumber=' + nhsNumber)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Patient not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Populate patient details in the modal
+                var patientDetailsDiv = document.getElementById('patientDetails');
+                patientDetailsDiv.innerHTML = `
+                        Name: ${data.firstName} ${data.lastName}<br>
+                        Address: ${data.address}<br>
+                        City: ${data.city}<br>
+                        Postcode: ${data.postcode}
+                    `;
+                // Display the modal using Bootstrap's modal method
+                var modal = new bootstrap.Modal(document.getElementById('patientModal'));
+                modal.show();
+            })
+            .catch(error => {
+                if (confirm('Patient with the provided NHS number not found. Would you like to add a new patient?')) {
+                    window.location.href = '/Patients/Create';
+                }
+            });
+    }
+
+    function showCallAnimation() {
+        document.getElementById('callAnimation').style.display = 'block';
+        setTimeout(function () {
+            document.getElementById('callAnimation').style.display = 'none';
+            // Insert the emergency call into the database after the animation
+            // This can be done by submitting the form
+        }, 10000);  // 10 seconds
+    }
+</script>
