@@ -257,22 +257,46 @@ namespace KwikMedical.Controllers
             return Ok();
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> CompleteEmergencyCall(int emergencyCallId)
+        [Route("Ambulances/ConcludeEmergencyCall")]
+        public async Task<IActionResult> ConcludeEmergencyCall(int emergencyCallId)
         {
-            var emergencyCall = await _context.EmergencyCalls.FindAsync(emergencyCallId);
-            if (emergencyCall == null)
+            try
             {
-                return NotFound();
+                // Fetch the emergency call
+                var emergencyCall = await _context.EmergencyCalls.FindAsync(emergencyCallId);
+                if (emergencyCall == null)
+                {
+                    return NotFound(new { status = "error", message = "Emergency call not found." });
+                }
+
+                // Fetch the associated ambulance
+                var ambulance = await _context.Ambulances.FindAsync(emergencyCall.AmbulanceId);
+                if (ambulance == null)
+                {
+                    return NotFound(new { status = "error", message = "Ambulance not found." });
+                }
+
+                // Make the ambulance available
+                ambulance.IsAvailable = true;
+                ambulance.CurrentEmergencyCallId = null;
+
+                // Delete the emergency call
+                _context.EmergencyCalls.Remove(emergencyCall);
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = "success", message = "Emergency call concluded successfully." });
             }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes.
+                Console.WriteLine($"Error concluding emergency call: {ex.Message}");
 
-            emergencyCall.IsCompleted = true;
-
-            _context.Update(emergencyCall);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+                // Return a failure status with the error message.
+                return BadRequest(new { status = "error", message = ex.Message });
+            }
         }
     }
 }
