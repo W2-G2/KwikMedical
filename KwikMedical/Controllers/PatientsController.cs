@@ -38,40 +38,6 @@ namespace KwikMedical.Controllers
             return View(patient);
         }
 
-        // GET: Patients/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var patient = await _context.Patients.FindAsync(id);
-            if (patient == null)
-            {
-                return NotFound();
-            }
-            return View(patient);
-        }
-
-        // GET: Patients/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var patient = await _context.Patients
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (patient == null)
-            {
-                return NotFound();
-            }
-
-            return View(patient);
-        }
-
         private bool PatientExists(int id)
         {
             return _context.Patients.Any(e => e.Id == id);
@@ -143,9 +109,15 @@ namespace KwikMedical.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int id)
+        // GET: Patients/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            var patient = _context.Patients.Find(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients.FindAsync(id);
             if (patient == null)
             {
                 return NotFound();
@@ -154,40 +126,55 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, Patient patient)
+        public async Task<IActionResult> Edit(int id, Patient patient)
         {
             if (id != patient.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                _context.Update(patient);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(patient);
+            _context.Update(patient);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+
+        // GET: Patients/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            var patient = _context.Patients.Find(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (patient == null)
             {
                 return NotFound();
             }
+
             return View(patient);
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var patient = _context.Patients.Find(id);
+            var patient = await _context.Patients.FindAsync(id);
+
+            // Find the associated medical record
+            var medicalRecord = _context.MedicalRecords.FirstOrDefault(m => m.PatientId == id);
+
+            // If a medical record is found, delete it
+            if (medicalRecord != null)
+            {
+                _context.MedicalRecords.Remove(medicalRecord);
+            }
+
+            // Now, delete the patient
             _context.Patients.Remove(patient);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

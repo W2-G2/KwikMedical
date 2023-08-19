@@ -31,3 +31,9 @@
         <input type="submit" value="Add Patient" class="btn btn-primary" />
     </div>
 </form>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}

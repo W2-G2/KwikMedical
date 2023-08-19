@@ -2,22 +2,10 @@
 
 <h2>Log New Emergency Call</h2>
 
-<form asp-action="Create">
+<<form asp-action="Create" asp-controller="EmergencyCalls" method="post">
     <div class="form-group">
-        <label asp-for="PatientId">Patient</label>
-        <select asp-for="PatientId" asp-items="ViewBag.Patients" class="form-control"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="EmergencyDetails">Emergency Details</label>
-        <textarea asp-for="EmergencyDetails" class="form-control" required></textarea>
-    </div>
-    <div class="form-group">
-        <label asp-for="EmergencyCity">Emergency City</label>
-        <input asp-for="EmergencyCity" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label asp-for="MedicalCondition">Medical Condition</label>
-        <input asp-for="MedicalCondition" class="form-control" required />
+        <label for="NHSNumber">Patient's NHS Number</label>
+        <input type="text" id="NHSNumber" name="NHSNumber" class="form-control" required />
     </div>
     <div class="form-group">
         <input type="submit" value="Log Call" class="btn btn-primary" />

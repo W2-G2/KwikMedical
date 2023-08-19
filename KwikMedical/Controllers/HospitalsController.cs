@@ -47,16 +47,32 @@ namespace KwikMedical.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,City,PreparationStatus")] Hospital hospital)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City,PreparationStatus")] Hospital hospital)
         {
-            // Set default value for PreparationStatus if not provided
-            if (string.IsNullOrEmpty(hospital.PreparationStatus))
+            if (id != hospital.Id)
             {
-                hospital.PreparationStatus = "DefaultStatus";
+                return NotFound();
             }
 
-            _context.Add(hospital);
-            await _context.SaveChangesAsync();
+            // Ensure PreparationStatus has a value
+            hospital.PreparationStatus = hospital.PreparationStatus ?? "DefaultStatus";
+
+            try
+            {
+                _context.Update(hospital);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!HospitalExists(hospital.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -72,39 +88,6 @@ namespace KwikMedical.Controllers
             if (hospital == null)
             {
                 return NotFound();
-            }
-            return View(hospital);
-        }
-
-        // POST: Hospitals/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Hospital hospital)
-        {
-            if (id != hospital.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(hospital);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!HospitalExists(hospital.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
             }
             return View(hospital);
         }
@@ -132,6 +115,9 @@ namespace KwikMedical.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var ambulances = _context.Ambulances.Where(a => a.HospitalId == id);
+            _context.Ambulances.RemoveRange(ambulances);
+
             var hospital = await _context.Hospitals.FindAsync(id);
             _context.Hospitals.Remove(hospital);
             await _context.SaveChangesAsync();

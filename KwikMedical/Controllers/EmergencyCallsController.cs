@@ -71,16 +71,20 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(EmergencyCall emergencyCall)
+        public IActionResult Create(EmergencyCall emergencyCall, string NHSNumber)
         {
-            // 1. Check the patient's information against the existing database.
-            var patient = _context.Patients.Find(emergencyCall.PatientId);
+            // Check if a patient with the entered NHS number exists
+            var patient = _context.Patients.FirstOrDefault(p => p.NHSNumber == NHSNumber);
+
             if (patient == null)
             {
-                ModelState.AddModelError("", "Patient not found in the database.");
-                ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
-                return View(emergencyCall);
+                // Redirect to the Create view for Patients with a message or flag indicating that the patient needs to be added
+                TempData["Message"] = "Patient with the provided NHS number doesn't exist. Please add the patient.";
+                return RedirectToAction("Create", "Patients");
             }
+
+            // If patient exists, set the PatientId for the emergency call
+            emergencyCall.PatientId = patient.Id;
 
             // 2. Determine the best way to help the patient.
             // This can be enhanced with more complex logic. For now, we'll just log the patient's medical condition.

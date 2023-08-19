@@ -163,21 +163,32 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, Ambulance ambulance)
+        public async Task<IActionResult> Edit(int id, Ambulance ambulance)
         {
             if (id != ambulance.Id)
             {
                 return NotFound();
             }
 
+            var associatedHospital = _context.Hospitals.Find(ambulance.HospitalId);
+            if (associatedHospital != null && !string.IsNullOrEmpty(associatedHospital.City))
+            {
+                ambulance.Location = associatedHospital.City;
+                ambulance.CurrentCity = associatedHospital.City;
+            }
+            else
+            {
+                ambulance.Location = "Unknown"; // Default value if the city is not found
+            }
+
             _context.Update(ambulance);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var ambulance = _context.Ambulances.Find(id);
+            var ambulance = await _context.Ambulances.FindAsync(id);
             if (ambulance == null)
             {
                 return NotFound();
@@ -186,11 +197,11 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ambulance = _context.Ambulances.Find(id);
+            var ambulance = await _context.Ambulances.FindAsync(id);
             _context.Ambulances.Remove(ambulance);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
     }
