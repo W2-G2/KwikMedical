@@ -232,8 +232,9 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateMedicalRecord(UpdatedMedicalRecordModel model)
+        public async Task<IActionResult> UpdateMedicalRecord([FromBody] UpdatedMedicalRecordModel model)
         {
+            Console.WriteLine("UpdateMedicalRecord method was called.");
             var medicalRecord = await _context.MedicalRecords.FindAsync(model.EmergencyCallId);
             if (medicalRecord == null)
             {

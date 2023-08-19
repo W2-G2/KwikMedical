@@ -146,11 +146,10 @@
                 emergencyCallId: emergencyCallId
             };
 
-            fetch('/Ambulances/UpdateMedicalRecord', {
+            fetch('https://localhost:44321/Ambulances/UpdateMedicalRecord', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                 },
                 body: JSON.stringify(updatedMedicalRecord)
             })
