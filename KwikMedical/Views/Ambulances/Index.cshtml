@@ -37,9 +37,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="emergencyDetailsModalLabel">Emergency Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <!-- Animation placeholder -->
@@ -86,16 +83,19 @@
                         <input type="hidden" id="hiddenEmergencyCallId" />
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="updateMedicalRecordBtn">Update Medical Record</button>
+                </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="updateMedicalRecordBtn">Update Medical Record</button>
         </div>
     </div>
 </div>
 
 <script>
+    function testFunction() {
+        console.log("Inline event triggered");
+    }
+
     function acceptEmergencyCall(ambulanceId) {
         fetch('/Ambulances/GetEmergencyDetails?ambulanceId=' + ambulanceId)
             .then(response => response.json())
@@ -103,17 +103,6 @@
                 // Display the animation of the ambulance traveling to the patient
                 document.getElementById('ambulanceAnimation').style.display = 'block';
                 document.getElementById('patientDetailsSection').style.display = 'none';
-
-                setTimeout(() => {
-                    // Animation of ambulance traveling to the hospital
-                    // TODO: Implement the actual animation logic here
-
-                    setTimeout(() => {
-                        // After the animation, complete the emergency call
-                        completeEmergencyCall(data.emergencyCallId);
-                    }, 5000);  // 5 seconds for the animation to the hospital
-                }, 5000);  // 5 seconds for displaying patient details
-
 
                 setTimeout(() => {
                     // After the animation, display the patient details and medical record in the modal
@@ -137,52 +126,49 @@
                     // Set the value of the hidden input field to the emergencyCallId
                     document.getElementById('hiddenEmergencyCallId').value = data.emergencyCallId;
 
-                }, 5000);  // 10 seconds for the animation
+                }, 5000);  // 5 seconds for the animation
 
                 // Display the modal
                 $('#emergencyDetailsModal').modal('show');
             });
     }
 
-    document.getElementById('updateMedicalRecordBtn').addEventListener('click', function () {
-        const emergencyCallId = document.getElementById('hiddenEmergencyCallId').value;
-        // Get the updated medical record details from the modal
-        const updatedMedicalRecord = {
-            clinicalNotes: document.getElementById('medicalRecordClinicalNotes').value,
-            laboratoryReports: document.getElementById('medicalRecordLaboratoryReports').value,
-            letters: document.getElementById('medicalRecordLetters').value,
-            prescriptionCharts: document.getElementById('medicalRecordPrescriptionCharts').value,
-            telephoneCalls: document.getElementById('medicalRecordTelephoneCalls').value,
-            xrays: document.getElementById('medicalRecordXrays').value,
-            emergencyCallId: emergencyCallId
-        };
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('updateMedicalRecordBtn').addEventListener('click', function () {
+            const emergencyCallId = document.getElementById('hiddenEmergencyCallId').value;
+            const updatedMedicalRecord = {
+                clinicalNotes: document.getElementById('medicalRecordClinicalNotes').value,
+                laboratoryReports: document.getElementById('medicalRecordLaboratoryReports').value,
+                letters: document.getElementById('medicalRecordLetters').value,
+                prescriptionCharts: document.getElementById('medicalRecordPrescriptionCharts').value,
+                telephoneCalls: document.getElementById('medicalRecordTelephoneCalls').value,
+                xrays: document.getElementById('medicalRecordXrays').value,
+                emergencyCallId: emergencyCallId
+            };
 
-        /// Send the updated medical record details to the server
-        fetch('/Ambulances/UpdateMedicalRecord', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedMedicalRecord)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('Medical record updated successfully.');
-
-                    // Hide patient details and show animation
-                    document.getElementById('patientDetailsSection').style.display = 'none';
-                    document.getElementById('ambulanceAnimation').textContent = "Animation of ambulance traveling to the hospital...";
-
-                    // After a delay, conclude the emergency call
-                    setTimeout(() => {
-                        completeEmergencyCall(emergencyCallId);
-                    }, 5000);  // 5 seconds for the animation to the hospital
-
-                } else {
-                    alert('Error updating the medical record.');
-                }
-            });
+            fetch('/Ambulances/UpdateMedicalRecord', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(updatedMedicalRecord)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Medical record updated successfully.');
+                        document.getElementById('patientDetailsSection').style.display = 'none';
+                        document.getElementById('ambulanceAnimation').textContent = "Animation of ambulance traveling to the hospital...";
+                        setTimeout(() => {
+                            completeEmergencyCall(emergencyCallId);
+                        }, 5000);
+                    } else {
+                        alert('Error updating the medical record.');
+                    }
+                });
+        });
     });
+
 
     function completeEmergencyCall(emergencyCallId) {
         fetch('/Ambulances/CompleteEmergencyCall', {

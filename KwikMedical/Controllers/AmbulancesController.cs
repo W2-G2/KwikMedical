@@ -232,70 +232,42 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateMedicalRecord(int medicalRecordId, MedicalRecord updatedMedicalRecord)
+        public async Task<IActionResult> UpdateMedicalRecord(UpdatedMedicalRecordModel model)
         {
-            var medicalRecord = _context.MedicalRecords.FirstOrDefault(mr => mr.Id == medicalRecordId);
-
+            var medicalRecord = await _context.MedicalRecords.FindAsync(model.EmergencyCallId);
             if (medicalRecord == null)
             {
-                return Json(new { success = false, message = "Medical record not found." });
+                return NotFound();
             }
 
-            // Update all fields of the MedicalRecord
-            medicalRecord.ClinicalNotes = updatedMedicalRecord.ClinicalNotes;
-            medicalRecord.LaboratoryReports = updatedMedicalRecord.LaboratoryReports;
-            medicalRecord.Letters = updatedMedicalRecord.Letters;
-            medicalRecord.PrescriptionCharts = updatedMedicalRecord.PrescriptionCharts;
-            medicalRecord.TelephoneCalls = updatedMedicalRecord.TelephoneCalls;
-            medicalRecord.Xrays = updatedMedicalRecord.Xrays;
+            medicalRecord.ClinicalNotes = model.ClinicalNotes;
+            medicalRecord.LaboratoryReports = model.LaboratoryReports;
+            medicalRecord.Letters = model.Letters;
+            medicalRecord.PrescriptionCharts = model.PrescriptionCharts;
+            medicalRecord.TelephoneCalls = model.TelephoneCalls;
+            medicalRecord.Xrays = model.Xrays;
 
-            try
-            {
-                _context.SaveChanges();
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error updating the medical record." });
-            }
+            _context.Update(medicalRecord);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
-
 
         [HttpPost]
-        public IActionResult CompleteEmergencyCall(int emergencyCallId)
+        public async Task<IActionResult> CompleteEmergencyCall(int emergencyCallId)
         {
-            var emergencyCall = _context.EmergencyCalls.FirstOrDefault(ec => ec.Id == emergencyCallId);
+            var emergencyCall = await _context.EmergencyCalls.FindAsync(emergencyCallId);
             if (emergencyCall == null)
             {
-                return Json(new { success = false, message = "Emergency call not found." });
+                return NotFound();
             }
 
-            var ambulance = _context.Ambulances.FirstOrDefault(a => a.Id == emergencyCall.AmbulanceId);
-            if (ambulance == null)
-            {
-                return Json(new { success = false, message = "Associated ambulance not found." });
-            }
+            emergencyCall.IsCompleted = true;
 
-            try
-            {
-                // Mark the emergency call as completed
-                emergencyCall.IsCompleted = true;
-                _context.Update(emergencyCall);
+            _context.Update(emergencyCall);
+            await _context.SaveChangesAsync();
 
-                // Update the ambulance's availability
-                ambulance.IsAvailable = true;
-                ambulance.CurrentEmergencyCallId = null;
-                _context.Update(ambulance);
-
-                _context.SaveChanges();
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error completing the emergency call." });
-            }
+            return Ok();
         }
-
     }
 }
