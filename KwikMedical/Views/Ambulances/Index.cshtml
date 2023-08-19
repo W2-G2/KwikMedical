@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<KwikMedical.Models.Ambulance>
 
-<h2>Ambulances List</h2>
+<h2>Ambulance Dashboard</h2>
 
 <table class="table">
     <thead>
         <tr>
             <th>Code</th>
             <th>Current City</th>
-            <th>Assigned Hospital</th>
-            <th>Actions</th>
+            <th>Assigned Emergency Call</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -17,11 +17,12 @@
             <tr>
                 <td>@ambulance.Code</td>
                 <td>@ambulance.CurrentCity</td>
-                <td>@ambulance.Hospital.Name</td>
+                <td>@ambulance.CurrentEmergencyCallId</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@ambulance.Id" class="btn btn-info">View</a>
-                    <a asp-action="Edit" asp-route-id="@ambulance.Id" class="btn btn-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@ambulance.Id" class="btn btn-danger">Delete</a>
+                    @if (ambulance.CurrentEmergencyCallId.HasValue)
+                    {
+                        <button onclick="acceptEmergencyCall(@ambulance.Id)">Accept</button>
+                    }
                 </td>
             </tr>
         }
@@ -29,3 +30,69 @@
 </table>
 
 <a asp-action="Create" class="btn btn-success">Add New Ambulance</a>
+
+<script>
+    function acceptEmergencyCall(ambulanceId) {
+        fetch('/Ambulances/GetEmergencyDetails?ambulanceId=' + ambulanceId)
+            .then(response => response.json())
+            .then(data => {
+                // Display the animation of the ambulance traveling to the patient
+                document.getElementById('ambulanceAnimation').style.display = 'block';
+                document.getElementById('patientDetailsSection').style.display = 'none';
+
+                setTimeout(() => {
+                    // Animation of ambulance traveling to the hospital
+                    // TODO: Implement the actual animation logic here
+
+                    setTimeout(() => {
+                        // After the animation, complete the emergency call
+                        completeEmergencyCall(data.emergencyCallId);
+                    }, 10000);  // 10 seconds for the animation to the hospital
+                }, 10000);  // 10 seconds for displaying patient details
+
+
+                setTimeout(() => {
+                    // After the animation, display the patient details and medical record in the modal
+                    document.getElementById('ambulanceAnimation').style.display = 'none';
+                    document.getElementById('patientDetailsSection').style.display = 'block';
+
+                    // Populate patient details
+                    document.getElementById('patientFullName').textContent = data.patientDetails.firstName + ' ' + data.patientDetails.lastName;
+                    document.getElementById('patientAddress').textContent = data.patientDetails.address;
+                    document.getElementById('patientCity').textContent = data.patientDetails.city;
+                    document.getElementById('patientPostcode').textContent = data.patientDetails.postcode;
+
+                    // TODO: Populate medical record details
+
+                }, 10000);  // 10 seconds for the animation
+
+                // Display the modal
+                $('#emergencyDetailsModal').modal('show');
+            });
+    }
+
+    // Handle the "Update Medical Record" button click
+    document.getElementById('updateMedicalRecordBtn').addEventListener('click', function () {
+        // TODO: Implement the logic to update the medical record
+    });
+
+    function completeEmergencyCall(emergencyCallId) {
+        fetch('/Ambulances/CompleteEmergencyCall', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ emergencyCallId: emergencyCallId })
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Hide the modal and refresh the page to reflect the changes
+                    $('#emergencyDetailsModal').modal('hide');
+                    location.reload();
+                } else {
+                    alert('Error completing the emergency call.');
+                }
+            });
+    }
+
+</script>

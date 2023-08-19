@@ -9,4 +9,41 @@
 <h4>Patient Medical Records</h4>
 <p>Laboratory Reports: @Model.MedicalRecord.LaboratoryReports</p>
 <p>Telephone Calls: @Model.MedicalRecord.TelephoneCalls</p>
-<!-- ... other medical record details ... -->
+
+<!-- Modal for displaying ambulance animation and patient details -->
+<div class="modal fade" id="emergencyDetailsModal" tabindex="-1" role="dialog" aria-labelledby="emergencyDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emergencyDetailsModalLabel">Emergency Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Animation placeholder -->
+                <div id="ambulanceAnimation">
+                    <!-- TODO: Insert the ambulance animation here -->
+                    <p>Animation of ambulance traveling...</p>
+                </div>
+
+                <!-- Patient Details -->
+                <div id="patientDetailsSection" style="display: none;">
+                    <h6>Patient Details</h6>
+                    <p><strong>Name:</strong> <span id="patientFullName"></span></p>
+                    <p><strong>Address:</strong> <span id="patientAddress"></span></p>
+                    <p><strong>City:</strong> <span id="patientCity"></span></p>
+                    <p><strong>Postcode:</strong> <span id="patientPostcode"></span></p>
+
+                    <!-- Medical Record Details -->
+                    <h6>Medical Record</h6>
+                    <!-- TODO: Add fields for the medical record details -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="updateMedicalRecordBtn">Update Medical Record</button>
+            </div>
+        </div>
+    </div>
+</div>

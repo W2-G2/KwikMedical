@@ -204,5 +204,67 @@ namespace KwikMedical.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public IActionResult GetEmergencyDetails(int ambulanceId)
+        {
+            var ambulance = _context.Ambulances.Include(a => a.CurrentEmergencyCall).ThenInclude(ec => ec.Patient).FirstOrDefault(a => a.Id == ambulanceId);
+            if (ambulance?.CurrentEmergencyCall == null)
+            {
+                return NotFound();
+            }
+
+            var patient = ambulance.CurrentEmergencyCall.Patient;
+            var medicalRecord = _context.MedicalRecords.FirstOrDefault(mr => mr.PatientId == patient.Id);
+
+            return Json(new
+            {
+                patientDetails = new
+                {
+                    patient.FirstName,
+                    patient.LastName,
+                    patient.Address,
+                    patient.City,
+                    patient.Postcode
+                },
+                medicalRecord
+            });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateMedicalRecord(int medicalRecordId, MedicalRecord updatedMedicalRecord)
+        {
+            var medicalRecord = _context.MedicalRecords.FirstOrDefault(mr => mr.Id == medicalRecordId);
+            if (medicalRecord == null)
+            {
+                return NotFound();
+            }
+
+            // Update the medical record fields
+            medicalRecord.LaboratoryReports = updatedMedicalRecord.LaboratoryReports;
+            medicalRecord.TelephoneCalls = updatedMedicalRecord.TelephoneCalls;
+            // ... Update other fields as needed
+
+            _context.Update(medicalRecord);
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult CompleteEmergencyCall(int emergencyCallId)
+        {
+            var emergencyCall = _context.EmergencyCalls.FirstOrDefault(ec => ec.Id == emergencyCallId);
+            if (emergencyCall == null)
+            {
+                return NotFound();
+            }
+
+            emergencyCall.IsCompleted = true;
+            _context.Update(emergencyCall);
+            _context.SaveChanges();
+
+            return Ok();
+        }
     }
 }

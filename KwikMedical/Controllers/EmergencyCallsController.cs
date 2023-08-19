@@ -65,6 +65,36 @@ public class EmergencyCallsController : Controller
         // If patient exists, set the PatientId for the emergency call
         emergencyCall.PatientId = patient.Id;
 
+        // Fetch a hospital from the same city as the EmergencyCity
+        var hospital = _context.Hospitals.FirstOrDefault(h => h.City == emergencyCall.EmergencyCity);
+        if (hospital != null)
+        {
+            emergencyCall.NearestHospital = hospital.Name;
+        }
+        else
+        {
+            // Handle the case where no hospital is found in the given city
+            ModelState.AddModelError("", "No hospital found in the emergency city.");
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+            return View(emergencyCall);
+        }
+
+        // Find an available ambulance in the same city as the NearestHospital
+        var ambulance = _context.Ambulances.FirstOrDefault(a => a.IsAvailable && a.CurrentCity == emergencyCall.EmergencyCity);
+        if (ambulance != null)
+        {
+            ambulance.CurrentEmergencyCallId = emergencyCall.Id;
+            ambulance.IsAvailable = false;
+            _context.Update(ambulance);
+        }
+        else
+        {
+            // Handle the case where no available ambulance is found in the given city
+            ModelState.AddModelError("", "No available ambulance in the emergency city.");
+            ViewBag.Patients = new SelectList(_context.Patients, "Id", "FullName");
+            return View(emergencyCall);
+        }
+
         // Determine the best way to help the patient.
         var medicalCondition = emergencyCall.MedicalCondition;
 
