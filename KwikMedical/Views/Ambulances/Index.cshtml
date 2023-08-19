@@ -82,14 +82,15 @@
                         <label>X-rays:</label>
                         <input type="text" id="medicalRecordXrays" />
                         <br>
-                    </div>
+
+                        <input type="hidden" id="hiddenEmergencyCallId" />
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="updateMedicalRecordBtn">Update Medical Record</button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="updateMedicalRecordBtn">Update Medical Record</button>
         </div>
     </div>
 </div>
@@ -110,8 +111,8 @@
                     setTimeout(() => {
                         // After the animation, complete the emergency call
                         completeEmergencyCall(data.emergencyCallId);
-                    }, 10000);  // 10 seconds for the animation to the hospital
-                }, 10000);  // 10 seconds for displaying patient details
+                    }, 5000);  // 5 seconds for the animation to the hospital
+                }, 5000);  // 5 seconds for displaying patient details
 
 
                 setTimeout(() => {
@@ -120,10 +121,10 @@
                     document.getElementById('patientDetailsSection').style.display = 'block';
 
                     // Populate patient details
-                    document.getElementById('patientFullName').value = data.patientDetails.firstName + ' ' + data.patientDetails.lastName;
-                    document.getElementById('patientAddress').value = data.patientDetails.address;
-                    document.getElementById('patientCity').value = data.patientDetails.city;
-                    document.getElementById('patientPostcode').value = data.patientDetails.postcode;
+                    document.getElementById('patientFullName').textContent = data.patientDetails.firstName + ' ' + data.patientDetails.lastName;
+                    document.getElementById('patientAddress').textContent = data.patientDetails.address;
+                    document.getElementById('patientCity').textContent = data.patientDetails.city;
+                    document.getElementById('patientPostcode').textContent = data.patientDetails.postcode;
 
                     // Populate medical record details
                     document.getElementById('medicalRecordClinicalNotes').value = data.medicalRecord.clinicalNotes;
@@ -133,7 +134,10 @@
                     document.getElementById('medicalRecordTelephoneCalls').value = data.medicalRecord.telephoneCalls;
                     document.getElementById('medicalRecordXrays').value = data.medicalRecord.xrays;
 
-                }, 10000);  // 10 seconds for the animation
+                    // Set the value of the hidden input field to the emergencyCallId
+                    document.getElementById('hiddenEmergencyCallId').value = data.emergencyCallId;
+
+                }, 5000);  // 10 seconds for the animation
 
                 // Display the modal
                 $('#emergencyDetailsModal').modal('show');
@@ -141,6 +145,7 @@
     }
 
     document.getElementById('updateMedicalRecordBtn').addEventListener('click', function () {
+        const emergencyCallId = document.getElementById('hiddenEmergencyCallId').value;
         // Get the updated medical record details from the modal
         const updatedMedicalRecord = {
             clinicalNotes: document.getElementById('medicalRecordClinicalNotes').value,
@@ -148,10 +153,11 @@
             letters: document.getElementById('medicalRecordLetters').value,
             prescriptionCharts: document.getElementById('medicalRecordPrescriptionCharts').value,
             telephoneCalls: document.getElementById('medicalRecordTelephoneCalls').value,
-            xrays: document.getElementById('medicalRecordXrays').value
+            xrays: document.getElementById('medicalRecordXrays').value,
+            emergencyCallId: emergencyCallId
         };
 
-        // Send the updated medical record details to the server
+        /// Send the updated medical record details to the server
         fetch('/Ambulances/UpdateMedicalRecord', {
             method: 'POST',
             headers: {
@@ -162,6 +168,16 @@
             .then(response => {
                 if (response.ok) {
                     alert('Medical record updated successfully.');
+
+                    // Hide patient details and show animation
+                    document.getElementById('patientDetailsSection').style.display = 'none';
+                    document.getElementById('ambulanceAnimation').textContent = "Animation of ambulance traveling to the hospital...";
+
+                    // After a delay, conclude the emergency call
+                    setTimeout(() => {
+                        completeEmergencyCall(emergencyCallId);
+                    }, 5000);  // 5 seconds for the animation to the hospital
+
                 } else {
                     alert('Error updating the medical record.');
                 }
