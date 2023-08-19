@@ -42,9 +42,11 @@ namespace KwikMedical.Data
                 .HasForeignKey(ec => ec.PatientId);
 
             modelBuilder.Entity<Ambulance>()
-                .HasOne(a => a.CurrentEmergencyCall)
-                .WithOne(ec => ec.Ambulance)
-                .HasForeignKey<EmergencyCall>(ec => ec.AmbulanceId);
+    .HasOne(a => a.CurrentEmergencyCall)
+    .WithOne(ec => ec.Ambulance)
+    .HasForeignKey<EmergencyCall>(ec => ec.AmbulanceId)
+    .OnDelete(DeleteBehavior.Restrict); // Add this line to prevent cascade delete
+
         }
     }
 }

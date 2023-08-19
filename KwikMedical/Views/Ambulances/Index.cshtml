@@ -146,7 +146,6 @@
                 xrays: document.getElementById('medicalRecordXrays').value
             };
 
-
             fetch('/Ambulances/UpdateMedicalRecord', {
                 method: 'POST',
                 headers: {
@@ -170,6 +169,7 @@
     });
 
     function completeEmergencyCall(emergencyCallId) {
+        console.log("Emergency Call ID:", emergencyCallId);
         fetch('/Ambulances/ConcludeEmergencyCall', {
             method: 'POST',
             headers: {

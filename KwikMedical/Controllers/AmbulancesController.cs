@@ -258,43 +258,37 @@ namespace KwikMedical.Controllers
         }
 
         [HttpPost]
-        [Route("Ambulances/ConcludeEmergencyCall")]
         public async Task<IActionResult> ConcludeEmergencyCall(int emergencyCallId)
         {
             try
             {
-                // Fetch the emergency call
-                var emergencyCall = await _context.EmergencyCalls.FindAsync(emergencyCallId);
-                if (emergencyCall == null)
-                {
-                    return NotFound(new { status = "error", message = "Emergency call not found." });
-                }
+                // Directly create an instance of EmergencyCall with the provided ID
+                var emergencyCall = new EmergencyCall { Id = emergencyCallId };
 
-                // Fetch the associated ambulance
-                var ambulance = await _context.Ambulances.FindAsync(emergencyCall.AmbulanceId);
-                if (ambulance == null)
-                {
-                    return NotFound(new { status = "error", message = "Ambulance not found." });
-                }
+                // Attach the instance to the DbContext
+                _context.EmergencyCalls.Attach(emergencyCall);
 
-                // Make the ambulance available
-                ambulance.IsAvailable = true;
-                ambulance.CurrentEmergencyCallId = null;
-
-                // Delete the emergency call
+                // Mark it for deletion
                 _context.EmergencyCalls.Remove(emergencyCall);
 
-                // Save changes to the database
+                // Find the associated ambulance
+                var ambulance = await _context.Ambulances
+                    .Where(a => a.CurrentEmergencyCallId == emergencyCallId)
+                    .FirstOrDefaultAsync();
+
+                if (ambulance != null)
+                {
+                    ambulance.IsAvailable = true;
+                    ambulance.CurrentEmergencyCallId = null;
+                }
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new { status = "success", message = "Emergency call concluded successfully." });
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging purposes.
                 Console.WriteLine($"Error concluding emergency call: {ex.Message}");
-
-                // Return a failure status with the error message.
                 return BadRequest(new { status = "error", message = ex.Message });
             }
         }
